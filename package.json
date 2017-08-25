@@ -1,0 +1,11 @@
+{
+  "name": "lossy-mirror",
+  "version": "0.0.0",
+  "description": "Create a lossy mirror of your lossless music library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Samuel Nilsson",
+  "license": "ISC"
+}
