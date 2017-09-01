@@ -6,13 +6,17 @@ const fs = require('fs');
 const path = require('path');
 
 program
-  .version('0.0.0');
+  .version('0.0.0')
+  .usage('<output-directory>')
+  .parse(process.argv);
+
+const outputDirectory = program.args[0];
 
 const files = fs.readdirSync('./');
 for (let i = 0; i < files.length; i++) {
   const filename = path.join('./', files[i]);
   if (path.extname(filename) === '.flac') {
-    sox.transcode(filename);
+    sox.transcode(filename, outputDirectory);
   }
 }
 

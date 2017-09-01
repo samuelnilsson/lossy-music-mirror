@@ -1,9 +1,9 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
-const transcode = (file) => {
+const transcode = (file, outputDirectory) => {
   fileName = path.parse(file).name;
-  const command = `sox "${file}" "${fileName}.ogg"`;
+  const command = `sox "${file}" "${outputDirectory}/${fileName}.ogg"`;
   execSync(command);
 };
 
