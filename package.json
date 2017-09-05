@@ -2,14 +2,22 @@
   "name": "lossy-mirror",
   "version": "0.0.0",
   "description": "Create a lossy mirror of your lossless music library",
-  "main": "index.js",
+  "start": "node build/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/tsc",
+    "lint": "node_modules/.bin/tslint --type-check --project tsconfig.json"
   },
   "author": "Samuel Nilsson",
   "license": "ISC",
   "dependencies": {
-    "commander": "^2.11.0",
-    "node-cmd": "^3.0.0"
+    "commander": "^2.11.0"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.9.2",
+    "@types/node": "^8.0.26",
+    "tslint": "^5.7.0",
+    "tslint-microsoft-contrib": "^5.0.1",
+    "typescript": "^2.5.2"
   }
 }
