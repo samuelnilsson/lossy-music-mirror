@@ -6,7 +6,8 @@
     "sourceMap": false,
     "outDir": "build",
     "baseUrl": "./",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": ["es2016"]
   },
   "include": [
     "**/*.ts"
