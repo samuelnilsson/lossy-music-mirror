@@ -4,7 +4,7 @@
   "description": "Create a lossy mirror of your lossless music library",
   "start": "node build/index.js",
   "scripts": {
-    "test": "node_modules/.bin/mocha build/**/*.spec.js",
+    "test": "npm run build && node_modules/.bin/mocha build/**/*.spec.js && npm run lint",
     "build": "node_modules/.bin/tsc",
     "lint": "node_modules/.bin/tslint --type-check --project tsconfig.json"
   },
