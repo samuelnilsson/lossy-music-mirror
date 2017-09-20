@@ -36,8 +36,9 @@ export class DirectoryIterator {
    * directory and its subdirectories.
    * @param The directory in which the iterator will start.
    */
-  private iterateDirectory(directory: string): void {
-    const filesInDirectory: File[] = this.getFilesInDirectory(directory);
+  private iterateDirectory(directoryPath: string): void {
+    const directory: File = new File(directoryPath);
+    const filesInDirectory: File[] = directory.getFiles();
 
     for (const file of filesInDirectory) {
       if (file.isDirectory()) {
@@ -46,18 +47,5 @@ export class DirectoryIterator {
         this.onFileCallback(file);
       }
     }
-  }
-
-  /**
-   * Finds the files and directories in the specified directory.
-   * @param   The directory in which to look for files.
-   * @returns The files and directories in the specified directory.
-   */
-  private getFilesInDirectory(directory: string): File[] {
-    const fileNamesInPath: string[] = fs.readdirSync(directory);
-
-    return fileNamesInPath.map<File>((fileName: string) => {
-      return new File(path.join(directory, fileName));
-    });
   }
 }

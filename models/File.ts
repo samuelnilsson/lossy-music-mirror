@@ -52,4 +52,16 @@ export class File {
   public getDirectory(): string {
     return path.dirname(this.absolutePath);
   }
+
+  /**
+   * Finds the files and directories in the directory.
+   * @returns The files and directories in the directory.
+   */
+  public getFiles(): File[] {
+    const fileNamesInPath: string[] = fs.readdirSync(this.absolutePath);
+
+    return fileNamesInPath.map<File>((fileName: string) => {
+      return new File(path.join(this.absolutePath, fileName));
+    });
+  }
 }

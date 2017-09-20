@@ -109,6 +109,27 @@ describe('File', () => {
     });
   });
 
+  describe('getFiles', () => {
+    it('should return the files in the directory', () => {
+      // Arrange
+      const directoryPath: string = '/any/test';
+      const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
+      fsStub = sinon.stub(fs, 'readdirSync');
+      fsStub.withArgs(directoryPath).returns(resultFileNames);
+      const directory: File = new File(directoryPath);
+
+      // Act
+      const result: File[] = directory.getFiles();
+
+      // Assert
+      assert.deepEqual(result, [
+        new File(`${directoryPath}/${resultFileNames[0]}`),
+        new File(`${directoryPath}/${resultFileNames[1]}`),
+        new File(`${directoryPath}/${resultFileNames[2]}`)
+      ]);
+    });
+  });
+
   afterEach(() => {
     if (pathStub != null) {
       pathStub.restore();
