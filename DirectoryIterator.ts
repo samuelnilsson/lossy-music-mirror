@@ -25,7 +25,8 @@ export class DirectoryIterator {
   }
 
   /**
-   * Starts the iterator.
+   * Executes the onFileCallback function for each file in the baseDirectory
+   * and its subdirectories.
    */
   public run(): void {
     this.iterateDirectory(this.baseDirectory);
