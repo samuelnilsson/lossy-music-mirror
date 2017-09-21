@@ -1,0 +1,9 @@
+**/*.ts
+tslint.json
+tsconfig.json
+package-lock.json
+.travis.yml
+gulpfile.js
+
+src/
+build/**/*.spec.js
