@@ -26,4 +26,12 @@ gulp.task('lint', () => {
     .pipe(gulpTslint.report());
 });
 
+gulp.task('watch', () => {
+  return gulp.watch('src/**/*.ts', ['default']);
+});
+
+gulp.task('watch:test', () => {
+  return gulp.watch('src/**/*.ts', ['test']);
+});
+
 gulp.task('default', ['compile', 'test', 'lint']);
