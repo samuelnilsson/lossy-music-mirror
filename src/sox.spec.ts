@@ -12,20 +12,18 @@ describe('sox', () => {
   let pathParseStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
   let childProcessStub: sinon.SinonStub;
+  let consoleInfoStub: sinon.SinonStub;
 
   describe('transcode', () => {
     it('should transcode the file into ogg using sox default options', () => {
       // Arrange
       const file: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub = sinon.stub(path, 'parse');
       pathParseStub.withArgs(file).returns({
         name: 'test'
       });
-      pathJoinStub = sinon.stub(path, 'join');
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
         .returns(`${outputDirectory}test.ogg`);
-      childProcessStub = sinon.stub(childProcess, 'execSync');
 
       //Act
       sox.transcode(file, outputDirectory);
@@ -35,6 +33,49 @@ describe('sox', () => {
       sinon.assert.calledOnce(childProcessStub);
       sinon.assert.calledWith(childProcessStub, expectedCommand);
     });
+
+    it('should log to the console which file is currently being transcoded', () => {
+      // Arrange
+      const file: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(file).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.ogg')
+        .returns(`${outputDirectory}test.ogg`);
+
+      //Act
+      sox.transcode(file, outputDirectory);
+
+      // Assert
+      const expectedOutput: string = 'Converting /any/test.flac to /test/test.ogg';
+      sinon.assert.calledOnce(consoleInfoStub);
+      sinon.assert.calledWith(consoleInfoStub, expectedOutput);
+    });
+
+    it('should log to the console before the transcoding starts', () => {
+      // Arrange
+      const file: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(file).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.ogg')
+        .returns(`${outputDirectory}test.ogg`);
+
+      //Act
+      sox.transcode(file, outputDirectory);
+
+      // Assert
+      sinon.assert.callOrder(consoleInfoStub, childProcessStub);
+    });
+  });
+
+  beforeEach(() => {
+    pathParseStub = sinon.stub(path, 'parse');
+    pathJoinStub = sinon.stub(path, 'join');
+    childProcessStub = sinon.stub(childProcess, 'execSync');
+    consoleInfoStub = sinon.stub(console, 'info');
   });
 
   afterEach(() => {
@@ -46,6 +87,9 @@ describe('sox', () => {
     }
     if (childProcessStub != null) {
       childProcessStub.restore();
+    }
+    if (consoleInfoStub != null) {
+      consoleInfoStub.restore();
     }
   });
 });
