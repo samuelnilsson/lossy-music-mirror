@@ -10,6 +10,7 @@ import { File } from './File';
 
 describe('File', () => {
   let pathStub: sinon.SinonStub;
+  let pathResolveStub: sinon.SinonStub;
   let fsStub: sinon.SinonStub;
 
   describe('getAbsolutePath', () => {
@@ -19,9 +20,9 @@ describe('File', () => {
       const absolutePath: string = '/any/test/test.any';
       pathStub = sinon.stub(path, 'resolve');
       pathStub.withArgs(relativePath).returns(absolutePath);
-      const file: File = new File(relativePath);
 
       // Act
+      const file: File = new File(relativePath);
       const result: string = file.getAbsolutePath();
 
       // Assert
@@ -33,15 +34,18 @@ describe('File', () => {
     it('should return true if the File is a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test';
+      const absoluteDirectoryPath: string = '/any/test';
+      pathResolveStub = sinon.stub(path, 'resolve');
+      pathResolveStub.withArgs(directoryPath).returns(absoluteDirectoryPath);
       fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(directoryPath).returns({
+      fsStub.withArgs(absoluteDirectoryPath).returns({
         isDirectory: (): boolean => {
           return true;
         }
       });
-      const file: File = new File(directoryPath);
 
       // Act
+      const file: File = new File(directoryPath);
       const result: boolean = file.isDirectory();
 
       // Assert
@@ -51,15 +55,18 @@ describe('File', () => {
     it('should return false if the File is not a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test.any';
+      const absoluteDirectoryPath: string = '/any/test';
+      pathResolveStub = sinon.stub(path, 'resolve');
+      pathResolveStub.withArgs(directoryPath).returns(absoluteDirectoryPath);
       fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(directoryPath).returns({
+      fsStub.withArgs(absoluteDirectoryPath).returns({
         isDirectory: (): boolean => {
           return false;
         }
       });
-      const file: File = new File(directoryPath);
 
       // Act
+      const file: File = new File(directoryPath);
       const result: boolean = file.isDirectory();
 
       // Assert
@@ -72,9 +79,9 @@ describe('File', () => {
       // Arrange
       const extension: string = 'any';
       const filePath: string = `/test/test.${extension}`;
-      const file: File = new File(filePath);
 
       // Act
+      const file: File = new File(filePath);
       const result: string = file.getExtension();
 
       // Assert
@@ -84,9 +91,9 @@ describe('File', () => {
     it('should return null if the file or directory has no extension', () => {
       // Arrange
       const directoryPath: string = '/test/test';
-      const directory: File = new File(directoryPath);
 
       // Act
+      const directory: File = new File(directoryPath);
       const result: string = directory.getExtension();
 
       // Assert
@@ -99,9 +106,14 @@ describe('File', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const filePath: string = `${directoryPath}/test.any`;
-      const file: File = new File(filePath);
+      const absoluteFilePath: string = '/any/any/test';
+      pathResolveStub = sinon.stub(path, 'resolve');
+      pathResolveStub.withArgs(filePath).returns(absoluteFilePath);
+      pathStub = sinon.stub(path, 'dirname');
+      pathStub.withArgs(absoluteFilePath).returns(directoryPath);
 
       // Act
+      const file: File = new File(filePath);
       const result: string = file.getDirectory();
 
       // Assert
@@ -114,11 +126,14 @@ describe('File', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
+      const absoluteFilePath: string = '/any/any/test';
+      pathResolveStub = sinon.stub(path, 'resolve');
+      pathResolveStub.withArgs(directoryPath).returns(absoluteFilePath);
       fsStub = sinon.stub(fs, 'readdirSync');
-      fsStub.withArgs(directoryPath).returns(resultFileNames);
-      const directory: File = new File(directoryPath);
+      fsStub.withArgs(absoluteFilePath).returns(resultFileNames);
 
       // Act
+      const directory: File = new File(directoryPath);
       const result: File[] = directory.getFiles();
 
       // Assert
@@ -133,6 +148,9 @@ describe('File', () => {
   afterEach(() => {
     if (pathStub != null) {
       pathStub.restore();
+    }
+    if (pathResolveStub != null) {
+      pathResolveStub.restore();
     }
     if (fsStub != null) {
       fsStub.restore();
