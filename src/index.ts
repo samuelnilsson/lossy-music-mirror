@@ -4,19 +4,23 @@
  * The starting script of the program.
  */
 
-import * as program from 'commander';
+import { ArgumentParserOptions } from 'argparse';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { CommandLineInputParser } from './CommandLineInputParser';
 import { DirectoryIterator } from './DirectoryIterator';
+import { CommandLineOptions } from './models/CommandLineOptions';
 import { File } from './models/File';
 import * as sox from './sox';
 
-program
-  .version('0.0.0')
-  .usage('<output-directory>')
-  .parse(process.argv);
+const parser: CommandLineInputParser = new CommandLineInputParser({
+  version: '0.0.0',
+  addHelp: true
+});
 
-const outputDirectory: string = program.args[0];
+const options: CommandLineOptions = parser.parse();
+
+const outputDirectory: string = options.output;
 
 run();
 

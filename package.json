@@ -14,6 +14,8 @@
   "author": "Samuel Nilsson",
   "license": "ISC",
   "dependencies": {
+    "@types/argparse": "^1.0.33",
+    "argparse": "^1.0.9",
     "commander": "^2.11.0",
     "fs-extra": "^4.0.1"
   },
