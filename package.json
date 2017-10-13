@@ -12,7 +12,7 @@
     "lint": "gulp lint"
   },
   "author": "Samuel Nilsson",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "commander": "^2.11.0",
     "fs-extra": "^4.0.1"
