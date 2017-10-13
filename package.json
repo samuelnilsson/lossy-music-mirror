@@ -12,7 +12,7 @@
     "lint": "gulp lint"
   },
   "author": "Samuel Nilsson",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/argparse": "^1.0.33",
     "argparse": "^1.0.9",

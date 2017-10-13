@@ -6,16 +6,16 @@ import { assert } from 'chai';
 import * as childProcess from 'child_process';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as sox from './sox';
+import * as ffmpeg from './ffmpeg';
 
-describe('sox', () => {
+describe('ffmpeg', () => {
   let pathParseStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
   let childProcessStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
 
   describe('transcode', () => {
-    it('should transcode the file into ogg using sox default options', () => {
+    it('should transcode the file into ogg using ffmpeg default options', () => {
       // Arrange
       const file: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
@@ -26,10 +26,10 @@ describe('sox', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      sox.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory);
 
       // Assert
-      const expectedCommand: string = 'sox "/any/test.flac" "/test/test.ogg"';
+      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis "/test/test.ogg"';
       sinon.assert.calledOnce(childProcessStub);
       sinon.assert.calledWith(childProcessStub, expectedCommand);
     });
@@ -45,7 +45,7 @@ describe('sox', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      sox.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory);
 
       // Assert
       const expectedOutput: string = 'Converting /any/test.flac to /test/test.ogg';
@@ -64,7 +64,7 @@ describe('sox', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      sox.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory);
 
       // Assert
       sinon.assert.callOrder(consoleInfoStub, childProcessStub);
