@@ -14,7 +14,7 @@ function transcode(file: string, outputDirectory: string): void {
   const fileName: string = path.parse(file).name;
   const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
   console.info(`Converting ${file} to ${outputPath}`);
-  const command: string = `sox "${file}" "${outputPath}"`;
+  const command: string = `ffmpeg -hide_banner -loglevel error -i "${file}" -c:a libvorbis "${outputPath}"`;
   execSync(command);
 }
 

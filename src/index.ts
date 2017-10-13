@@ -8,8 +8,8 @@ import * as program from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { DirectoryIterator } from './DirectoryIterator';
+import * as ffmpeg from './ffmpeg';
 import { File } from './models/File';
-import * as sox from './sox';
 
 program
   .version('0.0.0')
@@ -29,7 +29,7 @@ function run(): void {
       const relativeOutputPath: string = path.relative(path.resolve('./'), file.getDirectory());
       const absoluteOutputPath: string = path.join(path.resolve(outputDirectory), relativeOutputPath);
       createDirectory(absoluteOutputPath);
-      sox.transcode(file.getAbsolutePath(), absoluteOutputPath);
+      ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath);
     }
   });
   iterator.run();
