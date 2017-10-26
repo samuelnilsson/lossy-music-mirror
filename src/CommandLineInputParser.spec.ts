@@ -14,23 +14,27 @@ describe('CommandLineInputParser', () => {
   describe('parse', () => {
     let parseArgsStub: sinon.SinonStub;
     let addArgumentStub: sinon.SinonStub;
+    let validParseArgs: any;
 
     beforeEach(() => {
+      validParseArgs = {
+        output: 'any',
+        quality: null
+      };
       parseArgsStub = sinon.stub();
       addArgumentStub = sinon.stub();
+      parserStub = sinon.stub(a, 'ArgumentParser');
+      parseArgsStub.returns(validParseArgs);
+      parserStub.returns({
+        parseArgs: parseArgsStub,
+        addArgument: addArgumentStub
+      });
     });
 
     it('should set the output property on CommandLineOptions', () => {
       // Arrange
       const testOutput: string = 'outputDirectory';
-      parseArgsStub.returns({
-        output: testOutput
-      });
-      parserStub = sinon.stub(a, 'ArgumentParser');
-      parserStub.returns({
-        parseArgs: parseArgsStub,
-        addArgument: addArgumentStub
-      });
+      validParseArgs.output = testOutput;
       const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
 
       // Act
@@ -42,11 +46,6 @@ describe('CommandLineInputParser', () => {
 
     it('should initialize the output argument', () => {
       // Arrange
-      parserStub = sinon.stub(a, 'ArgumentParser');
-      parserStub.returns({
-        parseArgs: parseArgsStub,
-        addArgument: addArgumentStub
-      });
       const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
 
       // Act
@@ -61,11 +60,52 @@ describe('CommandLineInputParser', () => {
         }
       ).calledOnce);
     });
-  });
 
-  afterEach(() => {
-    if (parserStub != null) {
-      parserStub.restore();
-    }
+    it('should set the quality property on CommandLineOptions', () => {
+      // Arrange
+      const testQuality: number = 5;
+      validParseArgs.quality = testQuality;
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.equal(result.quality, testQuality);
+    });
+
+    it('should set the quality to 3 on CommandLineOptions by default', () => {
+      // Arrange
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.equal(result.quality, 3);
+    });
+
+    it('should initialize the quality argument', () => {
+      // Arrange
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.isTrue(addArgumentStub.withArgs(
+        [ '-q', '--quality' ],
+        {
+          type: 'int',
+          help: 'The vorbis quality (0-10 [default = 3])'
+        }
+      ).calledOnce);
+    });
+
+    afterEach(() => {
+      if (parserStub != null) {
+        parserStub.restore();
+      }
+    });
   });
 });

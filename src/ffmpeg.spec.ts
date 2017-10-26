@@ -1,5 +1,5 @@
 /**
- * Tests for the sox module
+ * Tests for the ffmpeg module
  */
 
 import { assert } from 'chai';
@@ -7,6 +7,7 @@ import * as childProcess from 'child_process';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import * as ffmpeg from './ffmpeg';
+import { CommandLineOptions } from './models/CommandLineOptions';
 
 describe('ffmpeg', () => {
   let pathParseStub: sinon.SinonStub;
@@ -14,8 +15,10 @@ describe('ffmpeg', () => {
   let childProcessStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
 
+  let validOptions: CommandLineOptions;
+
   describe('transcode', () => {
-    it('should transcode the file into ogg using ffmpeg default options', () => {
+    it('should transcode the file into ogg using ffmpeg and the provided options', () => {
       // Arrange
       const file: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
@@ -26,10 +29,10 @@ describe('ffmpeg', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      ffmpeg.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
-      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis "/test/test.ogg"';
+      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 "/test/test.ogg"';
       sinon.assert.calledOnce(childProcessStub);
       sinon.assert.calledWith(childProcessStub, expectedCommand);
     });
@@ -45,7 +48,7 @@ describe('ffmpeg', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      ffmpeg.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
       const expectedOutput: string = 'Converting /any/test.flac to /test/test.ogg';
@@ -64,7 +67,7 @@ describe('ffmpeg', () => {
         .returns(`${outputDirectory}test.ogg`);
 
       //Act
-      ffmpeg.transcode(file, outputDirectory);
+      ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.callOrder(consoleInfoStub, childProcessStub);
@@ -76,6 +79,7 @@ describe('ffmpeg', () => {
     pathJoinStub = sinon.stub(path, 'join');
     childProcessStub = sinon.stub(childProcess, 'execSync');
     consoleInfoStub = sinon.stub(console, 'info');
+    validOptions = new CommandLineOptions('any', 5);
   });
 
   afterEach(() => {

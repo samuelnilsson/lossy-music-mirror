@@ -2,6 +2,8 @@
   "extends": "tslint-microsoft-contrib",
   "rules": {
     "no-relative-imports": false,
-    "no-console": false
+    "no-console": false,
+    "no-any": false,
+    "no-unsafe-any": false
   }
 }

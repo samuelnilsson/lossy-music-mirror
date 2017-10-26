@@ -25,8 +25,19 @@ export class CommandLineInputParser {
    */
   public parse(): CommandLineOptions {
     this.initializeOptions();
+    const parsedArguments: any = this.parser.parseArgs();
 
-    return <CommandLineOptions>this.parser.parseArgs();
+    const output: string = parsedArguments.output;
+
+    let quality: number = parsedArguments.quality;
+    if (quality == null) {
+      quality = 3;
+    }
+
+    return new CommandLineOptions(
+      output,
+      quality
+    );
   }
 
   /**
@@ -38,6 +49,13 @@ export class CommandLineInputParser {
       {
         type: 'string',
         help: 'The output directory path'
+      }
+    );
+    this.parser.addArgument(
+      [ '-q', '--quality' ],
+      {
+        type: 'int',
+        help: 'The vorbis quality (0-10 [default = 3])'
       }
     );
   }

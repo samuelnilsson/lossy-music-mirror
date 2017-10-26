@@ -20,8 +20,6 @@ const parser: CommandLineInputParser = new CommandLineInputParser({
 
 const options: CommandLineOptions = parser.parse();
 
-const outputDirectory: string = options.output;
-
 run();
 
 /**
@@ -31,9 +29,9 @@ function run(): void {
   const iterator: DirectoryIterator = new DirectoryIterator('./', (file: File): void => {
     if (isLosslessAudioFile(file)) {
       const relativeOutputPath: string = path.relative(path.resolve('./'), file.getDirectory());
-      const absoluteOutputPath: string = path.join(path.resolve(outputDirectory), relativeOutputPath);
+      const absoluteOutputPath: string = path.join(path.resolve(options.output), relativeOutputPath);
       createDirectory(absoluteOutputPath);
-      ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath);
+      ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath, options);
     }
   });
   iterator.run();
