@@ -20,6 +20,17 @@ export class CommandLineInputParser {
   }
 
   /**
+   * Validates the command line input. Prints validation error messages to the
+   * console.
+   * @returns True if the validation succeeded and false otherwise.
+   */
+  public validate(): boolean {
+    const options: CommandLineOptions = this.parse();
+
+    return this.validQuality(options.quality);
+  }
+
+  /**
    * Parses the command line options.
    * @returns The parsed command line options.
    */
@@ -58,5 +69,13 @@ export class CommandLineInputParser {
         help: 'The vorbis quality (0-10 [default = 3])'
       }
     );
+  }
+
+  private validQuality(quality: number): boolean {
+    return quality >= 0 && quality <= 10 && !this.isDecimal(quality);
+  }
+
+  private isDecimal(n: number): boolean {
+    return n % 1 !== 0;
   }
 }

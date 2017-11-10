@@ -11,6 +11,16 @@ import { CommandLineOptions } from './models/CommandLineOptions';
 describe('CommandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
 
+  beforeEach(() => {
+    parserStub = sinon.stub(a, 'ArgumentParser');
+  });
+
+  afterEach(() => {
+    if (parserStub != null) {
+      parserStub.restore();
+    }
+  });
+
   describe('parse', () => {
     let parseArgsStub: sinon.SinonStub;
     let addArgumentStub: sinon.SinonStub;
@@ -23,7 +33,6 @@ describe('CommandLineInputParser', () => {
       };
       parseArgsStub = sinon.stub();
       addArgumentStub = sinon.stub();
-      parserStub = sinon.stub(a, 'ArgumentParser');
       parseArgsStub.returns(validParseArgs);
       parserStub.returns({
         parseArgs: parseArgsStub,
@@ -101,11 +110,75 @@ describe('CommandLineInputParser', () => {
         }
       ).calledOnce);
     });
+  });
+
+  describe('validate', () => {
+    let parseStub: sinon.SinonStub;
+    let validOptions: CommandLineOptions;
+    let parser: CommandLineInputParser;
+
+    beforeEach(() => {
+      parser = new CommandLineInputParser();
+      validOptions = new CommandLineOptions('output', 3);
+      parseStub = sinon.stub(parser, 'parse');
+      parseStub.returns(validOptions);
+    });
 
     afterEach(() => {
-      if (parserStub != null) {
-        parserStub.restore();
+      if (parseStub != null) {
+        parseStub.restore();
       }
+    });
+
+    it('should return true if quality is an int between 0-10', () => {
+      // Arrange
+      validOptions.quality = 0;
+
+      // Act
+      const zeroResult: boolean = parser.validate();
+
+      // Arrange
+      validOptions.quality = 10;
+
+      // Act
+      const tenResult: boolean = parser.validate();
+
+      // Assert
+      assert.isTrue(zeroResult);
+      assert.isTrue(tenResult);
+    });
+
+    it('should return false if quality is a negative number', () => {
+      // Arrange
+      validOptions.quality = -1;
+
+      // Act
+      const result: boolean = parser.validate();
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should return false if quality is larger than 10', () => {
+      // Arrange
+      validOptions.quality = 11;
+
+      // Act
+      const result: boolean = parser.validate();
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should return false if quality is a decimal', () => {
+      // Arrange
+      validOptions.quality = 4.4;
+
+      // Act
+      const result: boolean = parser.validate();
+
+      // Assert
+      assert.isFalse(result);
     });
   });
 });
