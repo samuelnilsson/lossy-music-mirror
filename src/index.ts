@@ -18,6 +18,10 @@ const parser: CommandLineInputParser = new CommandLineInputParser({
   addHelp: true
 });
 
+if (!parser.validate()) {
+  console.log('Validation failed.');
+  process.exit();
+}
 const options: CommandLineOptions = parser.parse();
 
 run();
