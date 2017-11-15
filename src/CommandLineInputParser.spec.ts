@@ -110,23 +110,42 @@ describe('CommandLineInputParser', () => {
         }
       ).calledOnce);
     });
+
+    it('should not be possible to add arguments more than once', () => {
+      // Arrange
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      commandLineParser.parse();
+      const callCount: number = addArgumentStub.callCount;
+      commandLineParser.parse();
+      const addedMoreThanOnce: boolean = callCount !== addArgumentStub.callCount;
+
+      // Assert
+      assert.isFalse(addedMoreThanOnce);
+    });
   });
 
   describe('validate', () => {
     let parseStub: sinon.SinonStub;
     let validOptions: CommandLineOptions;
     let parser: CommandLineInputParser;
+    let consoleInfoStub: sinon.SinonStub;
 
     beforeEach(() => {
       parser = new CommandLineInputParser();
       validOptions = new CommandLineOptions('output', 3);
       parseStub = sinon.stub(parser, 'parse');
       parseStub.returns(validOptions);
+      consoleInfoStub = sinon.stub(console, 'info');
     });
 
     afterEach(() => {
       if (parseStub != null) {
         parseStub.restore();
+      }
+      if (consoleInfoStub != null) {
+        consoleInfoStub.restore();
       }
     });
 
@@ -159,6 +178,22 @@ describe('CommandLineInputParser', () => {
       assert.isFalse(result);
     });
 
+    it('should print an error message if quality is a negative number', () => {
+      // Arrange
+      validOptions.quality = -1;
+
+      // Act
+      parser.validate();
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 0 and 10`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
     it('should return false if quality is larger than 10', () => {
       // Arrange
       validOptions.quality = 11;
@@ -170,6 +205,22 @@ describe('CommandLineInputParser', () => {
       assert.isFalse(result);
     });
 
+    it('should print an error message if quality is larger than 10', () => {
+      // Arrange
+      validOptions.quality = 11;
+
+      // Act
+      parser.validate();
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 0 and 10`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
     it('should return false if quality is a decimal', () => {
       // Arrange
       validOptions.quality = 4.4;
@@ -179,6 +230,22 @@ describe('CommandLineInputParser', () => {
 
       // Assert
       assert.isFalse(result);
+    });
+
+    it('should print an error message if quality is a decimal', () => {
+      // Arrange
+      validOptions.quality = 4.4;
+
+      // Act
+      parser.validate();
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `can't be a decimal`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
     });
   });
 });

@@ -10,6 +10,7 @@ import { CommandLineOptions } from './models/CommandLineOptions';
  */
 export class CommandLineInputParser {
   private parser: ArgumentParser;
+  private optionsInitialized: boolean;
 
   /**
    * Create a CommandLineInputParser.
@@ -17,6 +18,7 @@ export class CommandLineInputParser {
    */
   constructor(options: ArgumentParserOptions = {}) {
     this.parser = new ArgumentParser(options);
+    this.optionsInitialized = false;
   }
 
   /**
@@ -55,26 +57,53 @@ export class CommandLineInputParser {
    * Initializes the command line options.
    */
   private initializeOptions(): void {
-    this.parser.addArgument(
-      [ 'output' ],
-      {
-        type: 'string',
-        help: 'The output directory path'
-      }
-    );
-    this.parser.addArgument(
-      [ '-q', '--quality' ],
-      {
-        type: 'int',
-        help: 'The vorbis quality (0-10 [default = 3])'
-      }
-    );
+    if (!this.optionsInitialized) {
+      this.parser.addArgument(
+        [ 'output' ],
+        {
+          type: 'string',
+          help: 'The output directory path'
+        }
+      );
+      this.parser.addArgument(
+        [ '-q', '--quality' ],
+        {
+          type: 'int',
+          help: 'The vorbis quality (0-10 [default = 3])'
+        }
+      );
+      this.optionsInitialized = true;
+    }
   }
 
+  /**
+   * Validates the quality command line input. Prints validation error messages
+   * to the console.
+   * @returns True if the validation succeeded and false otherwise.
+   */
   private validQuality(quality: number): boolean {
-    return quality >= 0 && quality <= 10 && !this.isDecimal(quality);
+    if (quality < 0 || quality > 10) {
+      console.info(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 0 and 10`);
+
+      return false;
+    }
+    if (this.isDecimal(quality)) {
+      console.info(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `can't be a decimal`);
+
+      return false;
+    }
+
+    return true;
   }
 
+  /**
+   * Determines if n is a decimal.
+   * @returns True if n is a decimal and false otherwise.
+   */
   private isDecimal(n: number): boolean {
     return n % 1 !== 0;
   }

@@ -4,6 +4,7 @@
     "no-relative-imports": false,
     "no-console": false,
     "no-any": false,
-    "no-unsafe-any": false
+    "no-unsafe-any": false,
+    "no-multiline-string": false
   }
 }
