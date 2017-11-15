@@ -79,7 +79,7 @@ describe('ffmpeg', () => {
     pathJoinStub = sinon.stub(path, 'join');
     childProcessStub = sinon.stub(childProcess, 'execSync');
     consoleInfoStub = sinon.stub(console, 'info');
-    validOptions = new CommandLineOptions('any', 5);
+    validOptions = new CommandLineOptions('any', 5, 'anyInput');
   });
 
   afterEach(() => {

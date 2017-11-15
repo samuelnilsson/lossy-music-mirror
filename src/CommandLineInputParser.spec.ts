@@ -111,6 +111,47 @@ describe('CommandLineInputParser', () => {
       ).calledOnce);
     });
 
+    it('should set the input directory property on CommandLineOptions', () => {
+      // Arrange
+      const testInput: string = 'anyInput';
+      validParseArgs.input = testInput;
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.equal(result.input, testInput);
+    });
+
+    it('should set the input directory to the current directory by default', () => {
+      // Arrange
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.equal(result.input, './');
+    });
+
+    it('should initialize the input directory argument', () => {
+      // Arrange
+      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
+
+      // Act
+      const result: CommandLineOptions = commandLineParser.parse();
+
+      // Assert
+      assert.isTrue(addArgumentStub.withArgs(
+        [ '-i', '--input' ],
+        {
+          type: 'string',
+          help: 'The input directory path'
+        }
+      ).calledOnce);
+    });
+
     it('should not be possible to add arguments more than once', () => {
       // Arrange
       const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
@@ -134,7 +175,7 @@ describe('CommandLineInputParser', () => {
 
     beforeEach(() => {
       parser = new CommandLineInputParser();
-      validOptions = new CommandLineOptions('output', 3);
+      validOptions = new CommandLineOptions('output', 3, 'input');
       parseStub = sinon.stub(parser, 'parse');
       parseStub.returns(validOptions);
       consoleInfoStub = sinon.stub(console, 'info');
