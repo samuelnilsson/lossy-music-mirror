@@ -30,9 +30,9 @@ run();
  * Initializes and starts the DirectoryIterator and transcoder.
  */
 function run(): void {
-  const iterator: DirectoryIterator = new DirectoryIterator('./', (file: File): void => {
+  const iterator: DirectoryIterator = new DirectoryIterator(options.input, (file: File): void => {
     if (isLosslessAudioFile(file)) {
-      const relativeOutputPath: string = path.relative(path.resolve('./'), file.getDirectory());
+      const relativeOutputPath: string = path.relative(path.resolve(options.input), file.getDirectory());
       const absoluteOutputPath: string = path.join(path.resolve(options.output), relativeOutputPath);
       createDirectory(absoluteOutputPath);
       ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath, options);
