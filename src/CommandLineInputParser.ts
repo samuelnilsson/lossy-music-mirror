@@ -4,6 +4,7 @@
 
 import { ArgumentParser, ArgumentParserOptions } from 'argparse';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { File } from './models/File';
 
 /**
  * Class representing a CommandLineInputParser.
@@ -29,7 +30,8 @@ export class CommandLineInputParser {
   public validate(): boolean {
     const options: CommandLineOptions = this.parse();
 
-    return this.validQuality(options.quality);
+    return this.validQuality(options.quality)
+      && this.validInput(options.input);
   }
 
   /**
@@ -96,16 +98,31 @@ export class CommandLineInputParser {
    */
   private validQuality(quality: number): boolean {
     if (quality < 0 || quality > 10) {
-      console.info(
-        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
-          `must be between 0 and 10`);
+      console.info(`lossy-music-mirror: error: argument "-q/--quality": The ` +
+                   `value must be between 0 and 10`);
 
       return false;
     }
     if (this.isDecimal(quality)) {
-      console.info(
-        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
-          `can't be a decimal`);
+      console.info(`lossy-music-mirror: error: argument "-q/--quality": The ` +
+                   `value can't be a decimal`);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Validates the input directory command line input. Prints validation error
+   * messages to the console.
+   * @returns True if the validation succeeded and false otherwise.
+   */
+  private validInput(input: string): boolean {
+    const file: File = new File(input);
+    if (!file.isDirectory()) {
+      console.info(`lossy-music-mirror: error: argument "-i/--input": The ` +
+                   `value must be an existing directory`);
 
       return false;
     }

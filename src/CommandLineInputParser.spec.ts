@@ -7,6 +7,7 @@ import { assert } from 'chai';
 import * as sinon from 'sinon';
 import { CommandLineInputParser } from './CommandLineInputParser';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { File } from './models/File';
 
 describe('CommandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
@@ -172,6 +173,7 @@ describe('CommandLineInputParser', () => {
     let validOptions: CommandLineOptions;
     let parser: CommandLineInputParser;
     let consoleInfoStub: sinon.SinonStub;
+    let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
       parser = new CommandLineInputParser();
@@ -179,6 +181,8 @@ describe('CommandLineInputParser', () => {
       parseStub = sinon.stub(parser, 'parse');
       parseStub.returns(validOptions);
       consoleInfoStub = sinon.stub(console, 'info');
+      fileIsDirectoryStub = sinon.stub(File.prototype, 'isDirectory')
+        .returns(true);
     });
 
     afterEach(() => {
@@ -188,6 +192,17 @@ describe('CommandLineInputParser', () => {
       if (consoleInfoStub != null) {
         consoleInfoStub.restore();
       }
+      if (fileIsDirectoryStub != null) {
+        fileIsDirectoryStub.restore();
+      }
+    });
+
+    it('should return true if all options are valid', () => {
+      // Act
+      const result: boolean = parser.validate();
+
+      // Assert
+      assert.isTrue(result);
     });
 
     it('should return true if quality is an int between 0-10', () => {
@@ -285,6 +300,35 @@ describe('CommandLineInputParser', () => {
       const isCalled: boolean = consoleInfoStub.withArgs(
         `lossy-music-mirror: error: argument "-q/--quality": The value ` +
           `can't be a decimal`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
+    it('should return false if input is not a directory', () => {
+      // Arrange
+      validOptions.input = 'invalidDirectory';
+      fileIsDirectoryStub.returns(false);
+
+      // Act
+      const result: boolean = parser.validate();
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should return an error message if input is not a directory', () => {
+      // Arrange
+      validOptions.input = 'invalidDirectory';
+      fileIsDirectoryStub.returns(false);
+
+      // Act
+      parser.validate();
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-i/--input": The value ` +
+          `must be an existing directory`).called;
       assert.isTrue(isCalledOnce);
       assert.isTrue(isCalled);
     });
