@@ -3,6 +3,7 @@
  */
 
 import { execSync } from 'child_process';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
@@ -15,9 +16,13 @@ import { CommandLineOptions } from './models/CommandLineOptions';
 function transcode(file: string, outputDirectory: string, options: CommandLineOptions): void {
   const fileName: string = path.parse(file).name;
   const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
-  console.info(`Converting ${file} to ${outputPath}`);
-  const command: string = `ffmpeg -hide_banner -loglevel error -i "${file}" -c:a libvorbis -q:a ${options.quality} "${outputPath}"`;
-  execSync(command);
+  if (!fs.existsSync(outputPath)) {
+    console.info(`Converting ${file} to ${outputPath}`);
+    const command: string = `ffmpeg -hide_banner -loglevel error -i "${file}" -c:a libvorbis -q:a ${options.quality} "${outputPath}"`;
+    execSync(command);
+  } else {
+    console.info(`Skipping conversion to ${outputPath} since it already exists`);
+  }
 }
 
 export {

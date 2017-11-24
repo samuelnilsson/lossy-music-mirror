@@ -4,6 +4,7 @@
 
 import { assert } from 'chai';
 import * as childProcess from 'child_process';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import * as ffmpeg from './ffmpeg';
@@ -14,10 +15,38 @@ describe('ffmpeg', () => {
   let pathJoinStub: sinon.SinonStub;
   let childProcessStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
+  let fsExistsStub: sinon.SinonStub;
 
   let validOptions: CommandLineOptions;
 
   describe('transcode', () => {
+    beforeEach(() => {
+      pathParseStub = sinon.stub(path, 'parse');
+      pathJoinStub = sinon.stub(path, 'join');
+      childProcessStub = sinon.stub(childProcess, 'execSync');
+      consoleInfoStub = sinon.stub(console, 'info');
+      validOptions = new CommandLineOptions('any', 5, 'anyInput');
+      fsExistsStub = sinon.stub(fs, 'existsSync');
+    });
+
+    afterEach(() => {
+      if (pathParseStub != null) {
+        pathParseStub.restore();
+      }
+      if (pathJoinStub != null) {
+        pathJoinStub.restore();
+      }
+      if (childProcessStub != null) {
+        childProcessStub.restore();
+      }
+      if (consoleInfoStub != null) {
+        consoleInfoStub.restore();
+      }
+      if (fsExistsStub != null) {
+        fsExistsStub.restore();
+      }
+    });
+
     it('should transcode the file into ogg using ffmpeg and the provided options', () => {
       // Arrange
       const file: string = '/any/test.flac';
@@ -27,8 +56,10 @@ describe('ffmpeg', () => {
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
         .returns(`${outputDirectory}test.ogg`);
+      fsExistsStub.withArgs(`${outputDirectory}test.ogg`)
+        .returns(false);
 
-      //Act
+      // Act
       ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
@@ -46,8 +77,10 @@ describe('ffmpeg', () => {
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
         .returns(`${outputDirectory}test.ogg`);
+      fsExistsStub.withArgs(`${outputDirectory}test.ogg`)
+        .returns(false);
 
-      //Act
+      // Act
       ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
@@ -65,35 +98,55 @@ describe('ffmpeg', () => {
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
         .returns(`${outputDirectory}test.ogg`);
+      fsExistsStub.withArgs(`${outputDirectory}test.ogg`)
+        .returns(false);
 
-      //Act
+      // Act
       ffmpeg.transcode(file, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.callOrder(consoleInfoStub, childProcessStub);
     });
-  });
 
-  beforeEach(() => {
-    pathParseStub = sinon.stub(path, 'parse');
-    pathJoinStub = sinon.stub(path, 'join');
-    childProcessStub = sinon.stub(childProcess, 'execSync');
-    consoleInfoStub = sinon.stub(console, 'info');
-    validOptions = new CommandLineOptions('any', 5, 'anyInput');
-  });
+    it('should not transcode if the output file already exists', () => {
+      // Arrange
+      const file: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(file).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.ogg')
+        .returns(`${outputDirectory}test.ogg`);
+      fsExistsStub.withArgs(`${outputDirectory}test.ogg`)
+        .returns(true);
 
-  afterEach(() => {
-    if (pathParseStub != null) {
-      pathParseStub.restore();
-    }
-    if (pathJoinStub != null) {
-      pathJoinStub.restore();
-    }
-    if (childProcessStub != null) {
-      childProcessStub.restore();
-    }
-    if (consoleInfoStub != null) {
-      consoleInfoStub.restore();
-    }
+      // Act
+      ffmpeg.transcode(file, outputDirectory, validOptions);
+
+      // Assert
+      sinon.assert.notCalled(childProcessStub);
+    });
+
+    it('should print a message if the output file already exists', () => {
+      // Arrange
+      const file: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(file).returns({
+        name: 'test'
+      });
+      const output: string = `${outputDirectory}test.ogg`;
+      pathJoinStub.withArgs(outputDirectory, 'test.ogg')
+        .returns(output);
+      fsExistsStub.withArgs(output)
+        .returns(true);
+
+      // Act
+      ffmpeg.transcode(file, outputDirectory, validOptions);
+
+      // Assert
+      const expected: string = `Skipping conversion to ${output} since it already exists`;
+      sinon.assert.calledOnce(consoleInfoStub);
+      sinon.assert.calledWith(consoleInfoStub, expected);
+    });
   });
 });
