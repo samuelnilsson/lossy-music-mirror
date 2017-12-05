@@ -6,8 +6,8 @@ import * as a from 'argparse';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
 import { CommandLineInputParser } from './CommandLineInputParser';
+import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
-import { File } from './models/File';
 
 describe('CommandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
@@ -181,7 +181,7 @@ describe('CommandLineInputParser', () => {
       parseStub = sinon.stub(parser, 'parse');
       parseStub.returns(validOptions);
       consoleInfoStub = sinon.stub(console, 'info');
-      fileIsDirectoryStub = sinon.stub(File.prototype, 'isDirectory')
+      fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
         .returns(true);
     });
 

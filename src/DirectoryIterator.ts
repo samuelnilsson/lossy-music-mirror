@@ -4,14 +4,14 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { File } from './models/File';
+import * as file from './file';
 
 /**
  * Class representing a DirectoryIterator.
  */
 export class DirectoryIterator {
   private baseDirectory: string;
-  private onFileCallback: (file: File) => void;
+  private onFileCallback: (filePath: string) => void;
 
   /**
    * Create a DirectoryIterator.
@@ -19,8 +19,8 @@ export class DirectoryIterator {
    * @param onFileCallback - The function which will be executed for each file
    *                         in baseDirectory and its subdirectories.
    */
-  constructor(baseDirectory: string, onFileCallback: (file: File) => void) {
-    this.baseDirectory = path.resolve(baseDirectory);
+  constructor(baseDirectory: string, onFileCallback: (filePath: string) => void) {
+    this.baseDirectory = file.getAbsolutePath(baseDirectory);
     this.onFileCallback = onFileCallback;
   }
 
@@ -38,14 +38,13 @@ export class DirectoryIterator {
    * @param The directory in which the iterator will start.
    */
   private iterateDirectory(directoryPath: string): void {
-    const directory: File = new File(directoryPath);
-    const filesInDirectory: File[] = directory.getFiles();
+    const filesInDirectory: string[] = file.getFiles(directoryPath);
 
-    for (const file of filesInDirectory) {
-      if (file.isDirectory()) {
-        this.iterateDirectory(file.getAbsolutePath());
+    for (const filePath of filesInDirectory) {
+      if (file.isDirectory(filePath)) {
+        this.iterateDirectory(filePath);
       } else {
-        this.onFileCallback(file);
+        this.onFileCallback(filePath);
       }
     }
   }

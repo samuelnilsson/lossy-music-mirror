@@ -6,11 +6,10 @@ import { assert } from 'chai';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { File } from './File';
+import * as file from './file';
 
 describe('File', () => {
   let pathStub: sinon.SinonStub;
-  let pathResolveStub: sinon.SinonStub;
   let fsStub: sinon.SinonStub;
 
   describe('getAbsolutePath', () => {
@@ -22,8 +21,7 @@ describe('File', () => {
       pathStub.withArgs(relativePath).returns(absolutePath);
 
       // Act
-      const file: File = new File(relativePath);
-      const result: string = file.getAbsolutePath();
+      const result: string = file.getAbsolutePath(relativePath);
 
       // Assert
       assert.equal(result, absolutePath);
@@ -34,19 +32,15 @@ describe('File', () => {
     it('should return true if the File is a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test';
-      const absoluteDirectoryPath: string = '/any/test';
-      pathResolveStub = sinon.stub(path, 'resolve');
-      pathResolveStub.withArgs(directoryPath).returns(absoluteDirectoryPath);
       fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(absoluteDirectoryPath).returns({
+      fsStub.withArgs(directoryPath).returns({
         isDirectory: (): boolean => {
           return true;
         }
       });
 
       // Act
-      const file: File = new File(directoryPath);
-      const result: boolean = file.isDirectory();
+      const result: boolean = file.isDirectory(directoryPath);
 
       // Assert
       assert.isTrue(result);
@@ -55,19 +49,15 @@ describe('File', () => {
     it('should return false if the File is not a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test.any';
-      const absoluteDirectoryPath: string = '/any/test';
-      pathResolveStub = sinon.stub(path, 'resolve');
-      pathResolveStub.withArgs(directoryPath).returns(absoluteDirectoryPath);
       fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(absoluteDirectoryPath).returns({
+      fsStub.withArgs(directoryPath).returns({
         isDirectory: (): boolean => {
           return false;
         }
       });
 
       // Act
-      const file: File = new File(directoryPath);
-      const result: boolean = file.isDirectory();
+      const result: boolean = file.isDirectory(directoryPath);
 
       // Assert
       assert.isFalse(result);
@@ -81,8 +71,7 @@ describe('File', () => {
       const filePath: string = `/test/test.${extension}`;
 
       // Act
-      const file: File = new File(filePath);
-      const result: string = file.getExtension();
+      const result: string = file.getExtension(filePath);
 
       // Assert
       assert.equal(result, extension);
@@ -93,8 +82,7 @@ describe('File', () => {
       const directoryPath: string = '/test/test';
 
       // Act
-      const directory: File = new File(directoryPath);
-      const result: string = directory.getExtension();
+      const result: string = file.getExtension(directoryPath);
 
       // Assert
       assert.isNull(result);
@@ -106,15 +94,11 @@ describe('File', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const filePath: string = `${directoryPath}/test.any`;
-      const absoluteFilePath: string = '/any/any/test';
-      pathResolveStub = sinon.stub(path, 'resolve');
-      pathResolveStub.withArgs(filePath).returns(absoluteFilePath);
       pathStub = sinon.stub(path, 'dirname');
-      pathStub.withArgs(absoluteFilePath).returns(directoryPath);
+      pathStub.withArgs(filePath).returns(directoryPath);
 
       // Act
-      const file: File = new File(filePath);
-      const result: string = file.getDirectory();
+      const result: string = file.getDirectory(filePath);
 
       // Assert
       assert.equal(result, directoryPath);
@@ -126,21 +110,17 @@ describe('File', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
-      const absoluteFilePath: string = '/any/any/test';
-      pathResolveStub = sinon.stub(path, 'resolve');
-      pathResolveStub.withArgs(directoryPath).returns(absoluteFilePath);
       fsStub = sinon.stub(fs, 'readdirSync');
-      fsStub.withArgs(absoluteFilePath).returns(resultFileNames);
+      fsStub.withArgs(directoryPath).returns(resultFileNames);
 
       // Act
-      const directory: File = new File(directoryPath);
-      const result: File[] = directory.getFiles();
+      const result: string[] = file.getFiles(directoryPath);
 
       // Assert
       assert.deepEqual(result, [
-        new File(`${directoryPath}/${resultFileNames[0]}`),
-        new File(`${directoryPath}/${resultFileNames[1]}`),
-        new File(`${directoryPath}/${resultFileNames[2]}`)
+        `${directoryPath}/${resultFileNames[0]}`,
+        `${directoryPath}/${resultFileNames[1]}`,
+        `${directoryPath}/${resultFileNames[2]}`
       ]);
     });
   });
@@ -148,9 +128,6 @@ describe('File', () => {
   afterEach(() => {
     if (pathStub != null) {
       pathStub.restore();
-    }
-    if (pathResolveStub != null) {
-      pathResolveStub.restore();
     }
     if (fsStub != null) {
       fsStub.restore();

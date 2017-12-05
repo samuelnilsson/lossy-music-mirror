@@ -3,8 +3,8 @@
  */
 
 import { ArgumentParser, ArgumentParserOptions } from 'argparse';
+import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
-import { File } from './models/File';
 
 /**
  * Class representing a CommandLineInputParser.
@@ -119,8 +119,7 @@ export class CommandLineInputParser {
    * @returns True if the validation succeeded and false otherwise.
    */
   private validInput(input: string): boolean {
-    const file: File = new File(input);
-    if (!file.isDirectory()) {
+    if (!file.isDirectory(input)) {
       console.info(`lossy-music-mirror: error: argument "-i/--input": The ` +
                    `value must be an existing directory`);
 

@@ -10,8 +10,8 @@ import * as path from 'path';
 import { CommandLineInputParser } from './CommandLineInputParser';
 import { DirectoryIterator } from './DirectoryIterator';
 import * as ffmpeg from './ffmpeg';
+import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
-import { File } from './models/File';
 
 const parser: CommandLineInputParser = new CommandLineInputParser({
   version: '0.0.0',
@@ -31,22 +31,22 @@ run();
  */
 function run(): void {
   let numberOfFiles: number = 0;
-  let iterator: DirectoryIterator = new DirectoryIterator(options.input, (file: File): void => {
-    if (isLosslessAudioFile(file)) {
+  let iterator: DirectoryIterator = new DirectoryIterator(options.input, (filePath: string): void => {
+    if (isLosslessAudioFile(filePath)) {
       numberOfFiles += 1;
     }
   });
   iterator.run();
 
   let counter: number = 0;
-  iterator = new DirectoryIterator(options.input, (file: File): void => {
-    if (isLosslessAudioFile(file)) {
-      const relativeOutputPath: string = path.relative(path.resolve(options.input), file.getDirectory());
+  iterator = new DirectoryIterator(options.input, (filePath: string): void => {
+    if (isLosslessAudioFile(filePath)) {
+      const relativeOutputPath: string = path.relative(path.resolve(options.input), file.getDirectory(filePath));
       const absoluteOutputPath: string = path.join(path.resolve(options.output), relativeOutputPath);
       createDirectory(absoluteOutputPath);
       counter += 1;
       process.stdout.write(`${counter}/${numberOfFiles}: `);
-      ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath, options);
+      ffmpeg.transcode(file.getAbsolutePath(filePath), absoluteOutputPath, options);
     }
   });
   iterator.run();
@@ -67,10 +67,10 @@ function createDirectory(directory: string): void {
  * @param  The file.
  * @returns True if the file is a lossless audio file and false otherwise.
  */
-function isLosslessAudioFile(file: File): boolean {
+function isLosslessAudioFile(filePath: string): boolean {
   const LOSSLESS_EXTENSIONS: string[] = ['flac'];
 
   return LOSSLESS_EXTENSIONS.some((extension: string) => {
-    return extension === file.getExtension();
+    return extension === file.getExtension(filePath);
   });
 }
