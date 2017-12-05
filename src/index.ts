@@ -30,11 +30,22 @@ run();
  * Initializes and starts the DirectoryIterator and transcoder.
  */
 function run(): void {
-  const iterator: DirectoryIterator = new DirectoryIterator(options.input, (file: File): void => {
+  let numberOfFiles: number = 0;
+  let iterator: DirectoryIterator = new DirectoryIterator(options.input, (file: File): void => {
+    if (isLosslessAudioFile(file)) {
+      numberOfFiles += 1;
+    }
+  });
+  iterator.run();
+
+  let counter: number = 0;
+  iterator = new DirectoryIterator(options.input, (file: File): void => {
     if (isLosslessAudioFile(file)) {
       const relativeOutputPath: string = path.relative(path.resolve(options.input), file.getDirectory());
       const absoluteOutputPath: string = path.join(path.resolve(options.output), relativeOutputPath);
       createDirectory(absoluteOutputPath);
+      counter += 1;
+      process.stdout.write(`${counter}/${numberOfFiles}: `);
       ffmpeg.transcode(file.getAbsolutePath(), absoluteOutputPath, options);
     }
   });
