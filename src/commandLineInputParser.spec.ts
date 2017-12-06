@@ -5,7 +5,7 @@
 import * as a from 'argparse';
 import { assert } from 'chai';
 import * as sinon from 'sinon';
-import { CommandLineInputParser } from './CommandLineInputParser';
+import * as commandLineInputParser from './commandLineInputParser';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
@@ -45,21 +45,17 @@ describe('CommandLineInputParser', () => {
       // Arrange
       const testOutput: string = 'outputDirectory';
       validParseArgs.output = testOutput;
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
 
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.output, testOutput);
     });
 
     it('should initialize the output argument', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.isTrue(addArgumentStub.withArgs(
@@ -75,32 +71,25 @@ describe('CommandLineInputParser', () => {
       // Arrange
       const testQuality: number = 5;
       validParseArgs.quality = testQuality;
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
 
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.quality, testQuality);
     });
 
     it('should set the quality to 3 on CommandLineOptions by default', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.quality, 3);
     });
 
     it('should initialize the quality argument', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.isTrue(addArgumentStub.withArgs(
@@ -116,32 +105,25 @@ describe('CommandLineInputParser', () => {
       // Arrange
       const testInput: string = 'anyInput';
       validParseArgs.input = testInput;
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
 
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.input, testInput);
     });
 
     it('should set the input directory to the current directory by default', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.input, './');
     });
 
     it('should initialize the input directory argument', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
       // Act
-      const result: CommandLineOptions = commandLineParser.parse();
+      const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.isTrue(addArgumentStub.withArgs(
@@ -152,43 +134,21 @@ describe('CommandLineInputParser', () => {
         }
       ).calledOnce);
     });
-
-    it('should not be possible to add arguments more than once', () => {
-      // Arrange
-      const commandLineParser: CommandLineInputParser = new CommandLineInputParser();
-
-      // Act
-      commandLineParser.parse();
-      const callCount: number = addArgumentStub.callCount;
-      commandLineParser.parse();
-      const addedMoreThanOnce: boolean = callCount !== addArgumentStub.callCount;
-
-      // Assert
-      assert.isFalse(addedMoreThanOnce);
-    });
   });
 
   describe('validate', () => {
-    let parseStub: sinon.SinonStub;
     let validOptions: CommandLineOptions;
-    let parser: CommandLineInputParser;
     let consoleInfoStub: sinon.SinonStub;
     let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      parser = new CommandLineInputParser();
       validOptions = new CommandLineOptions('output', 3, 'input');
-      parseStub = sinon.stub(parser, 'parse');
-      parseStub.returns(validOptions);
       consoleInfoStub = sinon.stub(console, 'info');
       fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
         .returns(true);
     });
 
     afterEach(() => {
-      if (parseStub != null) {
-        parseStub.restore();
-      }
       if (consoleInfoStub != null) {
         consoleInfoStub.restore();
       }
@@ -199,7 +159,7 @@ describe('CommandLineInputParser', () => {
 
     it('should return true if all options are valid', () => {
       // Act
-      const result: boolean = parser.validate();
+      const result: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isTrue(result);
@@ -210,13 +170,13 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = 0;
 
       // Act
-      const zeroResult: boolean = parser.validate();
+      const zeroResult: boolean = commandLineInputParser.validate(validOptions);
 
       // Arrange
       validOptions.quality = 10;
 
       // Act
-      const tenResult: boolean = parser.validate();
+      const tenResult: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isTrue(zeroResult);
@@ -228,7 +188,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = -1;
 
       // Act
-      const result: boolean = parser.validate();
+      const result: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isFalse(result);
@@ -239,7 +199,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = -1;
 
       // Act
-      parser.validate();
+      commandLineInputParser.validate(validOptions);
 
       // Assert
       const isCalledOnce: boolean = consoleInfoStub.calledOnce;
@@ -255,7 +215,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = 11;
 
       // Act
-      const result: boolean = parser.validate();
+      const result: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isFalse(result);
@@ -266,7 +226,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = 11;
 
       // Act
-      parser.validate();
+      commandLineInputParser.validate(validOptions);
 
       // Assert
       const isCalledOnce: boolean = consoleInfoStub.calledOnce;
@@ -282,7 +242,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = 4.4;
 
       // Act
-      const result: boolean = parser.validate();
+      const result: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isFalse(result);
@@ -293,7 +253,7 @@ describe('CommandLineInputParser', () => {
       validOptions.quality = 4.4;
 
       // Act
-      parser.validate();
+      commandLineInputParser.validate(validOptions);
 
       // Assert
       const isCalledOnce: boolean = consoleInfoStub.calledOnce;
@@ -310,7 +270,7 @@ describe('CommandLineInputParser', () => {
       fileIsDirectoryStub.returns(false);
 
       // Act
-      const result: boolean = parser.validate();
+      const result: boolean = commandLineInputParser.validate(validOptions);
 
       // Assert
       assert.isFalse(result);
@@ -322,7 +282,7 @@ describe('CommandLineInputParser', () => {
       fileIsDirectoryStub.returns(false);
 
       // Act
-      parser.validate();
+      commandLineInputParser.validate(validOptions);
 
       // Assert
       const isCalledOnce: boolean = consoleInfoStub.calledOnce;

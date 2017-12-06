@@ -7,22 +7,21 @@
 import { ArgumentParserOptions } from 'argparse';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { CommandLineInputParser } from './CommandLineInputParser';
-import { DirectoryIterator } from './DirectoryIterator';
+import * as commandLineInputParser from './commandLineInputParser';
+import * as directoryIterator from './directoryIterator';
 import * as ffmpeg from './ffmpeg';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
-const parser: CommandLineInputParser = new CommandLineInputParser({
+const options: CommandLineOptions = commandLineInputParser.parse({
   version: '0.0.0',
   addHelp: true
 });
 
-if (!parser.validate()) {
+if (!commandLineInputParser.validate(options)) {
   console.log('Validation failed.');
   process.exit();
 }
-const options: CommandLineOptions = parser.parse();
 
 run();
 
@@ -31,15 +30,14 @@ run();
  */
 function run(): void {
   let numberOfFiles: number = 0;
-  let iterator: DirectoryIterator = new DirectoryIterator(options.input, (filePath: string): void => {
+  directoryIterator.run(options.input, (filePath: string): void => {
     if (isLosslessAudioFile(filePath)) {
       numberOfFiles += 1;
     }
   });
-  iterator.run();
 
   let counter: number = 0;
-  iterator = new DirectoryIterator(options.input, (filePath: string): void => {
+  directoryIterator.run(options.input, (filePath: string): void => {
     if (isLosslessAudioFile(filePath)) {
       const relativeOutputPath: string = path.relative(path.resolve(options.input), file.getDirectory(filePath));
       const absoluteOutputPath: string = path.join(path.resolve(options.output), relativeOutputPath);
@@ -49,7 +47,6 @@ function run(): void {
       ffmpeg.transcode(file.getAbsolutePath(filePath), absoluteOutputPath, options);
     }
   });
-  iterator.run();
 }
 
 /**
