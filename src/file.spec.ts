@@ -1,5 +1,5 @@
 /**
- * Tests for the File class
+ * Tests for the File module
  */
 
 import { assert } from 'chai';
@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import * as file from './file';
 
-describe('File', () => {
+describe('file', () => {
   let pathStub: sinon.SinonStub;
   let fsStub: sinon.SinonStub;
 
