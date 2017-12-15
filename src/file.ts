@@ -51,8 +51,6 @@ function getFiles(directoryPath: string): string[] {
   const fileNamesInPath: string[] = fs.readdirSync(directoryPath);
 
   return fileNamesInPath.map<string>((fileName: string) => {
-    console.log(getAbsolutePath(directoryPath));
-
     return path.join(directoryPath, fileName);
   });
 }
