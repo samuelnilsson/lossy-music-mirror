@@ -10,7 +10,19 @@ import * as file from './file';
 
 describe('file', () => {
   let pathStub: sinon.SinonStub;
-  let fsStub: sinon.SinonStub;
+  let fsExistsStub: sinon.SinonStub;
+  let fsEnsureDirStub: sinon.SinonStub;
+  let fsLstatStub: sinon.SinonStub;
+  let fsReadDirStub: sinon.SinonStub;
+  let fileIsDirectoryStub: sinon.SinonStub;
+  let fileGetDirectoryStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    fsExistsStub = sinon.stub(fs, 'existsSync');
+    fsEnsureDirStub = sinon.stub(fs, 'ensureDirSync');
+    fsLstatStub = sinon.stub(fs, 'lstatSync');
+    fsReadDirStub = sinon.stub(fs, 'readdirSync');
+  });
 
   describe('getAbsolutePath', () => {
     it('should return the absolute path of the file', () => {
@@ -32,8 +44,7 @@ describe('file', () => {
     it('should return true if the File is a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test';
-      fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(directoryPath).returns({
+      fsLstatStub.withArgs(directoryPath).returns({
         isDirectory: (): boolean => {
           return true;
         }
@@ -49,8 +60,7 @@ describe('file', () => {
     it('should return false if the File is not a directory', () => {
       // Arrange
       const directoryPath: string = '/test/test.any';
-      fsStub = sinon.stub(fs, 'lstatSync');
-      fsStub.withArgs(directoryPath).returns({
+      fsLstatStub.withArgs(directoryPath).returns({
         isDirectory: (): boolean => {
           return false;
         }
@@ -110,8 +120,7 @@ describe('file', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
-      fsStub = sinon.stub(fs, 'readdirSync');
-      fsStub.withArgs(directoryPath).returns(resultFileNames);
+      fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
 
       // Act
       const result: string[] = file.getFiles(directoryPath);
@@ -125,12 +134,97 @@ describe('file', () => {
     });
   });
 
+  describe('getRelativePath', () => {
+    beforeEach(() => {
+      fileIsDirectoryStub = sinon.stub(file, 'isDirectory');
+      fileIsDirectoryStub.withArgs('/any').returns(true);
+      fileIsDirectoryStub.withArgs('/any2').returns(true);
+      fileIsDirectoryStub.withArgs('/any/file.any').returns(false);
+      fileIsDirectoryStub.withArgs('/any2/file2.any').returns(false);
+
+      fileGetDirectoryStub = sinon.stub(file, 'getDirectory');
+      fileGetDirectoryStub.withArgs('/any/file.any').returns('/any');
+      fileGetDirectoryStub.withArgs('/any2/file2.any').returns('/any2');
+
+      pathStub = sinon.stub(path, 'relative');
+      pathStub.returns(null);
+      pathStub.withArgs('/any', '/any2').returns('/any3');
+    });
+
+    it('should return the the relative path if the input are files', () => {
+      // Act
+      const result: string = file.getRelativePath('/any/file.any', '/any2/file2.any');
+
+      // Assert
+      assert.equal(result, '/any3');
+    });
+
+    it('should return the the relative path if the input are directories', () => {
+      // Act
+      const result: string = file.getRelativePath('/any', '/any2');
+
+      // Assert
+      assert.equal(result, '/any3');
+    });
+
+    it('should return the the relative path if the input are one file and one directory', () => {
+      // Act
+      const result: string = file.getRelativePath('/any/file.any', '/any2');
+      const result2: string = file.getRelativePath('/any', '/any2/file2.any');
+
+      // Assert
+      assert.equal(result, '/any3');
+      assert.equal(result2, '/any3');
+    });
+  });
+
+  describe('createDirectory', () => {
+    it('should create the given directory if it does not exist', () => {
+      // Arrange
+      const testDirectoryName: string = 'directoryName';
+      fsExistsStub.returns(false);
+
+      // Act
+      file.createDirectory(testDirectoryName);
+
+      // Assert
+      assert.isTrue(fsEnsureDirStub.withArgs(testDirectoryName).calledOnce);
+    });
+
+    it('should not create the given directory if it does already exist', () => {
+      // Arrange
+      const testDirectoryName: string = 'directoryName';
+      fsExistsStub.returns(true);
+
+      // Act
+      file.createDirectory(testDirectoryName);
+
+      // Assert
+      assert.isTrue(fsEnsureDirStub.notCalled);
+    });
+  });
+
   afterEach(() => {
     if (pathStub != null) {
       pathStub.restore();
     }
-    if (fsStub != null) {
-      fsStub.restore();
+    if (fsExistsStub != null) {
+      fsExistsStub.restore();
+    }
+    if (fsEnsureDirStub != null) {
+      fsEnsureDirStub.restore();
+    }
+    if (fsLstatStub != null) {
+      fsLstatStub.restore();
+    }
+    if (fsReadDirStub != null) {
+      fsReadDirStub.restore();
+    }
+    if (fileIsDirectoryStub != null) {
+      fileIsDirectoryStub.restore();
+    }
+    if (fileGetDirectoryStub != null) {
+      fileGetDirectoryStub.restore();
     }
   });
 });

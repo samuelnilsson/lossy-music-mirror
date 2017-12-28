@@ -8,6 +8,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import * as ffmpeg from './ffmpeg';
+import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
 describe('ffmpeg', () => {
@@ -16,6 +17,7 @@ describe('ffmpeg', () => {
   let childProcessStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
   let fsExistsStub: sinon.SinonStub;
+  let fileGetExtensionStub: sinon.SinonStub;
 
   let validOptions: CommandLineOptions;
 
@@ -49,9 +51,9 @@ describe('ffmpeg', () => {
 
     it('should transcode the file into ogg using ffmpeg and the provided options', () => {
       // Arrange
-      const file: string = '/any/test.flac';
+      const testFile: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub.withArgs(file).returns({
+      pathParseStub.withArgs(testFile).returns({
         name: 'test'
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
@@ -60,7 +62,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(file, outputDirectory, validOptions);
+      ffmpeg.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 "/test/test.ogg"';
@@ -70,9 +72,9 @@ describe('ffmpeg', () => {
 
     it('should log to the console which file is currently being transcoded', () => {
       // Arrange
-      const file: string = '/any/test.flac';
+      const testFile: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub.withArgs(file).returns({
+      pathParseStub.withArgs(testFile).returns({
         name: 'test'
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
@@ -81,7 +83,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(file, outputDirectory, validOptions);
+      ffmpeg.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expectedOutput: string = 'Converting /any/test.flac to /test/test.ogg';
@@ -91,9 +93,9 @@ describe('ffmpeg', () => {
 
     it('should log to the console before the transcoding starts', () => {
       // Arrange
-      const file: string = '/any/test.flac';
+      const testFile: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub.withArgs(file).returns({
+      pathParseStub.withArgs(testFile).returns({
         name: 'test'
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
@@ -102,7 +104,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(file, outputDirectory, validOptions);
+      ffmpeg.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.callOrder(consoleInfoStub, childProcessStub);
@@ -110,9 +112,9 @@ describe('ffmpeg', () => {
 
     it('should not transcode if the output file already exists', () => {
       // Arrange
-      const file: string = '/any/test.flac';
+      const testFile: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub.withArgs(file).returns({
+      pathParseStub.withArgs(testFile).returns({
         name: 'test'
       });
       pathJoinStub.withArgs(outputDirectory, 'test.ogg')
@@ -121,7 +123,7 @@ describe('ffmpeg', () => {
         .returns(true);
 
       // Act
-      ffmpeg.transcode(file, outputDirectory, validOptions);
+      ffmpeg.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.notCalled(childProcessStub);
@@ -129,9 +131,9 @@ describe('ffmpeg', () => {
 
     it('should print a message if the output file already exists', () => {
       // Arrange
-      const file: string = '/any/test.flac';
+      const testFile: string = '/any/test.flac';
       const outputDirectory: string = '/test/';
-      pathParseStub.withArgs(file).returns({
+      pathParseStub.withArgs(testFile).returns({
         name: 'test'
       });
       const output: string = `${outputDirectory}test.ogg`;
@@ -141,12 +143,48 @@ describe('ffmpeg', () => {
         .returns(true);
 
       // Act
-      ffmpeg.transcode(file, outputDirectory, validOptions);
+      ffmpeg.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expected: string = `Skipping conversion to ${output} since it already exists`;
       sinon.assert.calledOnce(consoleInfoStub);
       sinon.assert.calledWith(consoleInfoStub, expected);
+    });
+  });
+
+  describe('isLosslessAudioFile', () => {
+    beforeEach(() => {
+      fileGetExtensionStub = sinon.stub(file, 'getExtension');
+    });
+
+    afterEach(() => {
+      if (fileGetExtensionStub != null) {
+        fileGetExtensionStub.restore();
+      }
+    });
+
+    it('should return true if the file extension is flac', () => {
+      // Arrange
+      const testFlacPath: string = '/any/file.flac';
+      fileGetExtensionStub.withArgs(testFlacPath).returns('flac');
+
+      // Act
+      const result: boolean = ffmpeg.isLosslessAudioFile(testFlacPath);
+
+      // Assert
+      assert.isTrue(result);
+    });
+
+    it('should return false if file is not lossless', () => {
+      // Arrange
+      const testFlacPath: string = '/any/file.notlossless';
+      fileGetExtensionStub.withArgs(testFlacPath).returns('notlossless');
+
+      // Act
+      const result: boolean = ffmpeg.isLosslessAudioFile(testFlacPath);
+
+      // Assert
+      assert.isFalse(result);
     });
   });
 });
