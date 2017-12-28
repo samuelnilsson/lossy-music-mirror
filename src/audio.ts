@@ -1,5 +1,5 @@
 /**
- * Contains functions that performs operations using ffmpeg
+ * Contains functions that performs operations on audio files
  */
 
 import { execSync } from 'child_process';
@@ -31,7 +31,7 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
  * @param  The file.
  * @returns True if the file is a lossless audio file and false otherwise.
  */
-function isLosslessAudioFile(filePath: string): boolean {
+function isLossless(filePath: string): boolean {
   const LOSSLESS_EXTENSIONS: string[] = ['flac'];
 
   return LOSSLESS_EXTENSIONS.some((extension: string) => {
@@ -41,5 +41,5 @@ function isLosslessAudioFile(filePath: string): boolean {
 
 export {
   transcode,
-  isLosslessAudioFile
+  isLossless
 };

@@ -6,9 +6,9 @@ import { assert } from 'chai';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import * as app from './app';
+import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
 import * as directoryIterator from './directoryIterator';
-import * as ffmpeg from './ffmpeg';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
@@ -16,8 +16,8 @@ describe('app', () => {
   describe('run', () => {
     let directoryIteratorStub: sinon.SinonStub;
     let processStdoutStub: sinon.SinonSpy;
-    let ffmpegTranscodeStub: sinon.SinonStub;
-    let ffmpegIsLosslessAudioFileStub: sinon.SinonStub;
+    let audioTranscodeStub: sinon.SinonStub;
+    let audioIsLosslessStub: sinon.SinonStub;
     let pathRelativeStub: sinon.SinonStub;
     let pathResolveStub: sinon.SinonStub;
     let pathJoinStub: sinon.SinonStub;
@@ -30,8 +30,8 @@ describe('app', () => {
 
     beforeEach(() => {
       processStdoutStub = sinon.stub(process.stdout, 'write');
-      ffmpegTranscodeStub = sinon.stub(ffmpeg, 'transcode');
-      ffmpegIsLosslessAudioFileStub = sinon.stub(ffmpeg, 'isLosslessAudioFile');
+      audioTranscodeStub = sinon.stub(audio, 'transcode');
+      audioIsLosslessStub = sinon.stub(audio, 'isLossless');
       pathRelativeStub = sinon.stub(path, 'relative');
       pathResolveStub = sinon.stub(path, 'resolve');
       pathJoinStub = sinon.stub(path, 'join');
@@ -55,9 +55,9 @@ describe('app', () => {
       pathJoinStub.withArgs('outputDir', 'relOutput2').returns('joinedOutput2');
       pathJoinStub.withArgs('outputDir', 'relOutput3').returns('joinedOutput3');
 
-      ffmpegIsLosslessAudioFileStub.withArgs(testData[0]).returns(true);
-      ffmpegIsLosslessAudioFileStub.withArgs(testData[1]).returns(true);
-      ffmpegIsLosslessAudioFileStub.withArgs(testData[2]).returns(false);
+      audioIsLosslessStub.withArgs(testData[0]).returns(true);
+      audioIsLosslessStub.withArgs(testData[1]).returns(true);
+      audioIsLosslessStub.withArgs(testData[2]).returns(false);
 
       commandLineInputParserValidateStub.returns(true);
 
@@ -84,7 +84,7 @@ describe('app', () => {
       // Assert
       assert.isTrue(consoleInfoStub.calledWith('Validation failed.'));
       assert.isTrue(fileCreateDirectoryStub.notCalled);
-      assert.isTrue(ffmpegTranscodeStub.notCalled);
+      assert.isTrue(audioTranscodeStub.notCalled);
     });
 
     it('should print current file number and the total number of files', () => {
@@ -115,9 +115,9 @@ describe('app', () => {
       processStdoutStub.restore();
 
       // Assert
-      assert.isTrue(ffmpegTranscodeStub.withArgs(testData[0], 'joinedOutput1', options).calledOnce);
-      assert.isTrue(ffmpegTranscodeStub.withArgs(testData[1], 'joinedOutput2', options).calledOnce);
-      assert.isTrue(ffmpegTranscodeStub.calledTwice);
+      assert.isTrue(audioTranscodeStub.withArgs(testData[0], 'joinedOutput1', options).calledOnce);
+      assert.isTrue(audioTranscodeStub.withArgs(testData[1], 'joinedOutput2', options).calledOnce);
+      assert.isTrue(audioTranscodeStub.calledTwice);
     });
 
     it('should print file count before creating the output directory', () => {
@@ -135,7 +135,7 @@ describe('app', () => {
       processStdoutStub.restore();
 
       // Assert
-      assert.isTrue(fileCreateDirectoryStub.calledBefore(ffmpegTranscodeStub));
+      assert.isTrue(fileCreateDirectoryStub.calledBefore(audioTranscodeStub));
     });
 
     afterEach(() => {
@@ -145,11 +145,11 @@ describe('app', () => {
       if (processStdoutStub != null) {
         processStdoutStub.restore();
       }
-      if (ffmpegTranscodeStub != null) {
-        ffmpegTranscodeStub.restore();
+      if (audioTranscodeStub != null) {
+        audioTranscodeStub.restore();
       }
-      if (ffmpegIsLosslessAudioFileStub != null) {
-        ffmpegIsLosslessAudioFileStub.restore();
+      if (audioIsLosslessStub != null) {
+        audioIsLosslessStub.restore();
       }
       if (pathRelativeStub != null) {
         pathRelativeStub.restore();

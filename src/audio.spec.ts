@@ -1,5 +1,5 @@
 /**
- * Tests for the ffmpeg module
+ * Tests for the audio module
  */
 
 import { assert } from 'chai';
@@ -7,11 +7,11 @@ import * as childProcess from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import * as ffmpeg from './ffmpeg';
+import * as audio from './audio';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
-describe('ffmpeg', () => {
+describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
   let childProcessStub: sinon.SinonStub;
@@ -62,7 +62,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(testFile, outputDirectory, validOptions);
+      audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 "/test/test.ogg"';
@@ -83,7 +83,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(testFile, outputDirectory, validOptions);
+      audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expectedOutput: string = 'Converting /any/test.flac to /test/test.ogg';
@@ -104,7 +104,7 @@ describe('ffmpeg', () => {
         .returns(false);
 
       // Act
-      ffmpeg.transcode(testFile, outputDirectory, validOptions);
+      audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.callOrder(consoleInfoStub, childProcessStub);
@@ -123,7 +123,7 @@ describe('ffmpeg', () => {
         .returns(true);
 
       // Act
-      ffmpeg.transcode(testFile, outputDirectory, validOptions);
+      audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       sinon.assert.notCalled(childProcessStub);
@@ -143,7 +143,7 @@ describe('ffmpeg', () => {
         .returns(true);
 
       // Act
-      ffmpeg.transcode(testFile, outputDirectory, validOptions);
+      audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
       const expected: string = `Skipping conversion to ${output} since it already exists`;
@@ -152,7 +152,7 @@ describe('ffmpeg', () => {
     });
   });
 
-  describe('isLosslessAudioFile', () => {
+  describe('isLossless', () => {
     beforeEach(() => {
       fileGetExtensionStub = sinon.stub(file, 'getExtension');
     });
@@ -169,7 +169,7 @@ describe('ffmpeg', () => {
       fileGetExtensionStub.withArgs(testFlacPath).returns('flac');
 
       // Act
-      const result: boolean = ffmpeg.isLosslessAudioFile(testFlacPath);
+      const result: boolean = audio.isLossless(testFlacPath);
 
       // Assert
       assert.isTrue(result);
@@ -181,7 +181,7 @@ describe('ffmpeg', () => {
       fileGetExtensionStub.withArgs(testFlacPath).returns('notlossless');
 
       // Act
-      const result: boolean = ffmpeg.isLosslessAudioFile(testFlacPath);
+      const result: boolean = audio.isLossless(testFlacPath);
 
       // Assert
       assert.isFalse(result);

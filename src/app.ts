@@ -4,9 +4,9 @@
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
 import * as directoryIterator from './directoryIterator';
-import * as ffmpeg from './ffmpeg';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
@@ -16,20 +16,20 @@ function run(options: CommandLineOptions): void {
   } else {
     let numberOfFiles: number = 0;
     directoryIterator.run(options.input, (filePath: string): void => {
-      if (ffmpeg.isLosslessAudioFile(filePath)) {
+      if (audio.isLossless(filePath)) {
         numberOfFiles += 1;
       }
     });
 
     let counter: number = 0;
     directoryIterator.run(options.input, (filePath: string): void => {
-      if (ffmpeg.isLosslessAudioFile(filePath)) {
+      if (audio.isLossless(filePath)) {
         const relativeOutputPath: string = file.getRelativePath(options.input, filePath);
         const resolvedOutputPath: string = path.join(options.output, relativeOutputPath);
         file.createDirectory(resolvedOutputPath);
         counter += 1;
         process.stdout.write(`${counter}/${numberOfFiles}: `);
-        ffmpeg.transcode(filePath, resolvedOutputPath, options);
+        audio.transcode(filePath, resolvedOutputPath, options);
       }
     });
   }
