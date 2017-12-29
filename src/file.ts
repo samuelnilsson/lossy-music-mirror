@@ -47,13 +47,13 @@ function getDirectory(filePath: string): string {
 /**
  * Finds the files and directories in the directory.
  * @param   The path to the file.
- * @returns Absolute paths to the files and directories in the directory.
+ * @returns The paths to the files and directories in the directory.
  */
 function getFiles(directoryPath: string): string[] {
   const fileNamesInPath: string[] = fs.readdirSync(directoryPath);
 
   return fileNamesInPath.map<string>((fileName: string) => {
-    return path.join(self.getAbsolutePath(directoryPath), fileName);
+    return path.join(directoryPath, fileName);
   });
 }
 
