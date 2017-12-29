@@ -1,5 +1,5 @@
 /**
- * Tests for the CommandLineInputParser class
+ * Tests for the CommandLineInputParser module
  */
 
 import * as a from 'argparse';
@@ -9,7 +9,7 @@ import * as commandLineInputParser from './commandLineInputParser';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
-describe('CommandLineInputParser', () => {
+describe('commandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
 
   beforeEach(() => {
