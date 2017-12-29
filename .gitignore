@@ -4,6 +4,9 @@ package-lock.json
 # Directories
 node_modules/
 build/
+.nyc_output/
+coverage/
 
-# Editor generated files
+# Editor files
 *.swp
+.vimrc

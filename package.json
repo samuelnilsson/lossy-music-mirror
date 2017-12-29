@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run compile && npm run testscript && npm run lint",
     "testscript": "nyc --all mocha build/**/*.spec.js",
-    "coveragereport": "nyc report --reporter=lcovonly --all mocha build/**/*.spec.js -- -R spec && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "coveragereport": "nyc report --reporter=text-lcov | coveralls",
     "compile": "tsc",
     "lint": "tslint --project tsconfig.json"
   },
