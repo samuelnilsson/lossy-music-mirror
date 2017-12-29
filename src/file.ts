@@ -5,6 +5,8 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+const self: any = exports;
+
 /**
  * Gets the absolute path to the file.
  * @param   The path to the file.
@@ -45,14 +47,42 @@ function getDirectory(filePath: string): string {
 /**
  * Finds the files and directories in the directory.
  * @param   The path to the file.
- * @returns The paths to the files and directories in the directory.
+ * @returns Absolute paths to the files and directories in the directory.
  */
 function getFiles(directoryPath: string): string[] {
   const fileNamesInPath: string[] = fs.readdirSync(directoryPath);
 
   return fileNamesInPath.map<string>((fileName: string) => {
-    return path.join(directoryPath, fileName);
+    return path.join(self.getAbsolutePath(directoryPath), fileName);
   });
+}
+
+/**
+ * Finds the relative path from filePathA to filePathB. If the path points to a
+ * file, the file is ignored and instead the directory of the file is used.
+ * @param   pathA The path to the first file or directory.
+ * @param   pathB The path to the second file or directory.
+ * @returns       The relative path from filePathA to filePathB.
+ */
+function getRelativePath(pathA: string, pathB: string): string {
+  if (!self.isDirectory(pathA)) {
+    pathA = self.getDirectory(pathA);
+  }
+  if (!self.isDirectory(pathB)) {
+    pathB = self.getDirectory(pathB);
+  }
+
+  return path.relative(pathA, pathB);
+}
+
+/**
+ * Creates the given directory.
+ * @param The path to the directory to create.
+ */
+function createDirectory(directory: string): void {
+  if (!fs.existsSync(directory)) {
+    fs.ensureDirSync(directory);
+  }
 }
 
 export {
@@ -60,5 +90,7 @@ export {
   isDirectory,
   getExtension,
   getDirectory,
-  getFiles
+  getFiles,
+  getRelativePath,
+  createDirectory
 };
