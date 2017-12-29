@@ -121,6 +121,10 @@ describe('file', () => {
       const directoryPath: string = '/any/test';
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
       fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
+      pathStub = sinon.stub(path, 'join');
+      pathStub.withArgs(directoryPath, 'test.any').returns(`${directoryPath}/${resultFileNames[0]}`);
+      pathStub.withArgs(directoryPath, 'test2.any').returns(`${directoryPath}/${resultFileNames[1]}`);
+      pathStub.withArgs(directoryPath, 'test3.any').returns(`${directoryPath}/${resultFileNames[2]}`);
 
       // Act
       const result: string[] = file.getFiles(directoryPath);
