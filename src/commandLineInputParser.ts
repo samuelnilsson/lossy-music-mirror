@@ -68,7 +68,7 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-i', '--input' ],
     {
       type: 'string',
-      help: 'The input directory path'
+      help: 'The input directory path [default = ./]'
     }
   );
 }

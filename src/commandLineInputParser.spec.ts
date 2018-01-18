@@ -130,7 +130,7 @@ describe('commandLineInputParser', () => {
         [ '-i', '--input' ],
         {
           type: 'string',
-          help: 'The input directory path'
+          help: 'The input directory path [default = ./]'
         }
       ).calledOnce);
     });
