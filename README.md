@@ -1,4 +1,6 @@
-# lossy-music-mirror
+# lossy-music-mirror 
+![alt text](https://api.travis-ci.org/samuelnilsson/lossy-music-mirror.svg?branch=master) ![alt text](https://coveralls.io/repos/github/samuelnilsson/lossy-music-mirror/badge.svg?branch=master)
+
 Create a lossy mirror of your lossless music library.
 
 ## Usage
