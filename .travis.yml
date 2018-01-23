@@ -13,3 +13,7 @@ deploy:
     branch: master
     tags: true
     repo: samuelnilsson/lossy-music-mirror
+  on:
+    branch: release/*
+    tags: true
+    repo: samuelnilsson/lossy-music-mirror

@@ -1,9 +1,14 @@
 **/*.ts
+**/*.js.map
 tslint.json
 tsconfig.json
 package-lock.json
 .travis.yml
 gulpfile.js
+.nyc_output
+.nycrc
 
 src/
+test/
+coverage/
 build/**/*.spec.js
