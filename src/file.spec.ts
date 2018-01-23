@@ -4,7 +4,7 @@
 
 import { assert } from 'chai';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as file from './file';
 

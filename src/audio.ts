@@ -4,7 +4,7 @@
 
 import { execSync } from 'child_process';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as path from 'path-extra';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 

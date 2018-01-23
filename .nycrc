@@ -1,4 +1,13 @@
 {
-  "exclude": ["build/**/*.spec.js","gulpfile.js"],
-  "include": ["build/**/*.js"]
+  "exclude": ["src/**/*.spec.ts","gulpfile.js"],
+  "include": ["src/**/*.ts"],
+  "all": true,
+  "extension": [
+    ".ts"
+  ],
+  "require": [
+    "ts-node/register"
+  ],
+  "sourceMap": true,
+  "instrument": true
 }

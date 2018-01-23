@@ -5,7 +5,7 @@
 import { assert } from 'chai';
 import * as childProcess from 'child_process';
 import * as fs from 'fs-extra';
-import * as path from 'path';
+import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as audio from './audio';
 import * as file from './file';
