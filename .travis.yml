@@ -4,6 +4,8 @@ node_js:
 - '8'
 after_script:
 - npm run coveragereport
+before_deploy:
+- npm run compile
 deploy:
   provider: npm
   email: samni698@gmail.com
