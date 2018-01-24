@@ -41,7 +41,7 @@ Optional arguments:
 
 ## Development
 ### Install dependencies
-node (at least version 8) and npm are required. The remaining dependencies is installed by running
+[node](https://nodejs.org) (at least version 8), npm and [ffmpeg](https://www.ffmpeg.org) are required. The remaining dependencies is installed by running
 
 ```
 npm install
@@ -70,4 +70,4 @@ If you want to contribute to this repository, please make a pull request on the 
 
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
