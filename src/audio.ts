@@ -19,7 +19,8 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
   const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
   if (!fs.existsSync(outputPath)) {
     console.info(`Converting ${filePath} to ${outputPath}`);
-    const command: string = `ffmpeg -hide_banner -loglevel error -i "${filePath}" -c:a libvorbis -q:a ${options.quality} "${outputPath}"`;
+    const command: string = `ffmpeg -hide_banner -loglevel error -i ` +
+      `"${filePath}" -c:a libvorbis -q:a ${options.quality} -vn "${outputPath}"`;
     execSync(command);
   } else {
     console.info(`Skipping conversion to ${outputPath} since it already exists`);

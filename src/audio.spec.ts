@@ -65,7 +65,7 @@ describe('audio', () => {
       audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
-      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 "/test/test.ogg"';
+      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 -vn "/test/test.ogg"';
       sinon.assert.calledOnce(childProcessStub);
       sinon.assert.calledWith(childProcessStub, expectedCommand);
     });
