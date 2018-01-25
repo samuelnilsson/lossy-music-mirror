@@ -6,7 +6,7 @@ Create a lossy mirror of your lossless music library.
 ## Usage
 
 ### Prerequisites
-In order to use the package, node (tested with version 8 and higher) and npm are required.
+In order to use the package, node (tested with version 8 and higher), npm and [ffmpeg](https://www.ffmpeg.org) are required.
 
 ### Installation
 The package is installed by issuing the following command:
@@ -63,6 +63,8 @@ npm test
 ```
 
 ## Contributing
+If you find any issues, or have any feature suggestions, please add an issue on [github](https://github.com/samuelnilsson/lossy-music-mirror).
+
 If you want to contribute to this repository, please make a pull request on the develop branch. In order to increase the chance that the pull request will be accepted, please see if the change is requested in the issue list and/or contact the repository owner before implementing the change.
 
 ## Authors
