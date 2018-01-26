@@ -18,6 +18,5 @@ deploy:
     node: '9'
   on:
     branch: release/*
-    tags: true
     repo: samuelnilsson/lossy-music-mirror
     node: '9'
