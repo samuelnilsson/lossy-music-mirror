@@ -79,7 +79,7 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-c', '--codec' ],
     {
       type: 'string',
-      help: 'The output codec',
+      help: 'The output codec [default = vorbis]',
       defaultValue: 'vorbis',
       choices: ['vorbis', 'mp3']
     }
