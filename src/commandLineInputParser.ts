@@ -4,7 +4,7 @@
 
 import { ArgumentParser, ArgumentParserOptions } from 'argparse';
 import * as file from './file';
-import { CommandLineOptions } from './models/CommandLineOptions';
+import { Codec, CommandLineOptions } from './models/CommandLineOptions';
 
 /**
  * Validates the command line options. Prints validation error messages to the
@@ -39,10 +39,14 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
     input = './';
   }
 
+  const codecString: string = parsedArguments.codec;
+  const codec: Codec = mapCodec(codecString);
+
   return new CommandLineOptions(
     output,
     quality,
-    input
+    input,
+    codec
   );
 }
 
@@ -126,6 +130,17 @@ function validInput(input: string): boolean {
  */
 function isDecimal(n: number): boolean {
   return n % 1 !== 0;
+}
+
+function mapCodec(codec: string): Codec {
+  switch (codec) {
+    case 'mp3': {
+      return Codec.Mp3;
+    }
+    default: {
+      return Codec.Vorbis;
+    }
+  }
 }
 
 export {

@@ -7,7 +7,7 @@ import { assert } from 'chai';
 import * as sinon from 'sinon';
 import * as commandLineInputParser from './commandLineInputParser';
 import * as file from './file';
-import { CommandLineOptions } from './models/CommandLineOptions';
+import { Codec, CommandLineOptions } from './models/CommandLineOptions';
 
 describe('commandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
@@ -30,7 +30,9 @@ describe('commandLineInputParser', () => {
     beforeEach(() => {
       validParseArgs = {
         output: 'any',
-        quality: null
+        quality: null,
+        input: null,
+        codec: 'vorbis'
       };
       parseArgsStub = sinon.stub();
       addArgumentStub = sinon.stub();
@@ -135,6 +137,23 @@ describe('commandLineInputParser', () => {
       ).calledOnce);
     });
 
+    it('should map the codec argument to the correct Codec enum', () => {
+      // Arrange
+      const vorbis: string = 'vorbis';
+      const mp3: string = 'mp3';
+
+      // Act
+      validParseArgs.codec = vorbis;
+      const vorbisResult: CommandLineOptions = commandLineInputParser.parse();
+
+      validParseArgs.codec = mp3;
+      const mp3Result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.deepEqual(vorbisResult.codec, Codec.Vorbis);
+      assert.deepEqual(mp3Result.codec, Codec.Mp3);
+    });
+
     it('should initialize the codec argument', () => {
       // Act
       const result: CommandLineOptions = commandLineInputParser.parse();
@@ -158,7 +177,7 @@ describe('commandLineInputParser', () => {
     let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      validOptions = new CommandLineOptions('output', 3, 'input');
+      validOptions = new CommandLineOptions('output', 3, 'input', Codec.Vorbis);
       consoleInfoStub = sinon.stub(console, 'info');
       fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
         .returns(true);

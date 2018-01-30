@@ -9,7 +9,7 @@ import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as audio from './audio';
 import * as file from './file';
-import { CommandLineOptions } from './models/CommandLineOptions';
+import { Codec, CommandLineOptions } from './models/CommandLineOptions';
 
 describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
@@ -27,7 +27,7 @@ describe('audio', () => {
       pathJoinStub = sinon.stub(path, 'join');
       childProcessStub = sinon.stub(childProcess, 'execSync');
       consoleInfoStub = sinon.stub(console, 'info');
-      validOptions = new CommandLineOptions('any', 5, 'anyInput');
+      validOptions = new CommandLineOptions('any', 5, 'anyInput', Codec.Vorbis);
       fsExistsStub = sinon.stub(fs, 'existsSync');
     });
 
