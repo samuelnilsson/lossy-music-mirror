@@ -71,6 +71,15 @@ function initializeOptions(parser: ArgumentParser): void {
       help: 'The input directory path [default = ./]'
     }
   );
+  parser.addArgument(
+    [ '-c', '--codec' ],
+    {
+      type: 'string',
+      help: 'The output codec',
+      defaultValue: 'vorbis',
+      choices: ['vorbis', 'mp3']
+    }
+  );
 }
 
 /**

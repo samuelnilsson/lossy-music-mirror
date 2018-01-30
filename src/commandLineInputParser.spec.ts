@@ -134,6 +134,22 @@ describe('commandLineInputParser', () => {
         }
       ).calledOnce);
     });
+
+    it('should initialize the codec argument', () => {
+      // Act
+      const result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.isTrue(addArgumentStub.withArgs(
+        [ '-c', '--codec' ],
+        {
+          type: 'string',
+          help: 'The output codec',
+          defaultValue: 'vorbis',
+          choices: ['vorbis', 'mp3']
+        }
+      ).calledOnce);
+    });
   });
 
   describe('validate', () => {
