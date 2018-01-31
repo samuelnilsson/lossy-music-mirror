@@ -70,6 +70,28 @@ describe('audio', () => {
       sinon.assert.calledWith(childProcessStub, expectedCommand);
     });
 
+    it('should transcode the file into mp3 if that option is set', () => {
+      // Arrange
+      const testFile: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(testFile).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.mp3')
+        .returns(`${outputDirectory}test.mp3`);
+      fsExistsStub.withArgs(`${outputDirectory}test.mp3`)
+        .returns(false);
+      validOptions.codec = Codec.Mp3;
+
+      // Act
+      audio.transcode(testFile, outputDirectory, validOptions);
+
+      // Assert
+      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libmp3lame -q:a 5 -vn "/test/test.mp3"';
+      sinon.assert.calledOnce(childProcessStub);
+      sinon.assert.calledWith(childProcessStub, expectedCommand);
+    });
+
     it('should log to the console which file is currently being transcoded', () => {
       // Arrange
       const testFile: string = '/any/test.flac';

@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
 import * as file from './file';
-import { CommandLineOptions } from './models/CommandLineOptions';
+import { Codec, CommandLineOptions } from './models/CommandLineOptions';
 
 /**
  * Transcodes the file into ogg vorbis and writes it to outputDirectory.
@@ -16,11 +16,14 @@ import { CommandLineOptions } from './models/CommandLineOptions';
  */
 function transcode(filePath: string, outputDirectory: string, options: CommandLineOptions): void {
   const fileName: string = path.parse(filePath).name;
-  const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
+  const codecLib: string = getCodecLib(options.codec);
+  const codecExtension: string = getCodecExtension(options.codec);
+  const outputPath: string = path.join(outputDirectory, `${fileName}.${codecExtension}`);
+
   if (!fs.existsSync(outputPath)) {
     console.info(`Converting ${filePath} to ${outputPath}`);
     const command: string = `ffmpeg -hide_banner -loglevel error -i ` +
-      `"${filePath}" -c:a libvorbis -q:a ${options.quality} -vn "${outputPath}"`;
+      `"${filePath}" -c:a ${codecLib} -q:a ${options.quality} -vn "${outputPath}"`;
     execSync(command);
   } else {
     console.info(`Skipping conversion to ${outputPath} since it already exists`);
@@ -38,6 +41,28 @@ function isLossless(filePath: string): boolean {
   return LOSSLESS_EXTENSIONS.some((extension: string) => {
     return extension === file.getExtension(filePath);
   });
+}
+
+function getCodecLib(codec: Codec): string {
+  switch (codec) {
+    case Codec.Mp3: {
+      return 'libmp3lame';
+    }
+    default: {
+      return 'libvorbis';
+    }
+  }
+}
+
+function getCodecExtension(codec: Codec): string {
+  switch (codec) {
+    case Codec.Mp3: {
+      return 'mp3';
+    }
+    default: {
+      return 'ogg';
+    }
+  }
 }
 
 export {
