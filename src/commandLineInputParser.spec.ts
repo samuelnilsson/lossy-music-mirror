@@ -7,7 +7,9 @@ import { assert } from 'chai';
 import * as sinon from 'sinon';
 import * as commandLineInputParser from './commandLineInputParser';
 import * as file from './file';
-import { Codec, CommandLineOptions } from './models/CommandLineOptions';
+import { CommandLineOptions } from './models/CommandLineOptions';
+import { Mp3 } from './models/Mp3';
+import { Vorbis } from './models/Vorbis';
 
 describe('commandLineInputParser', () => {
   let parserStub: sinon.SinonStub;
@@ -137,7 +139,7 @@ describe('commandLineInputParser', () => {
       ).calledOnce);
     });
 
-    it('should map the codec argument to the correct Codec enum', () => {
+    it('should map the codec argument to the correct codec type', () => {
       // Arrange
       const vorbis: string = 'vorbis';
       const mp3: string = 'mp3';
@@ -150,8 +152,8 @@ describe('commandLineInputParser', () => {
       const mp3Result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
-      assert.deepEqual(vorbisResult.codec, Codec.Vorbis);
-      assert.deepEqual(mp3Result.codec, Codec.Mp3);
+      assert.isTrue(vorbisResult.codec instanceof Vorbis);
+      assert.isTrue(mp3Result.codec instanceof Mp3);
     });
 
     it('should initialize the codec argument', () => {
@@ -177,7 +179,7 @@ describe('commandLineInputParser', () => {
     let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      validOptions = new CommandLineOptions('output', 3, 'input', Codec.Vorbis);
+      validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis());
       consoleInfoStub = sinon.stub(console, 'info');
       fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
         .returns(true);
@@ -200,7 +202,7 @@ describe('commandLineInputParser', () => {
       assert.isTrue(result);
     });
 
-    it('should return true if quality is an int between 0-10', () => {
+    it('should return true if quality is an int between 0-10 and codec is vorbis', () => {
       // Arrange
       validOptions.quality = 0;
 
@@ -209,6 +211,25 @@ describe('commandLineInputParser', () => {
 
       // Arrange
       validOptions.quality = 10;
+
+      // Act
+      const tenResult: boolean = commandLineInputParser.validate(validOptions);
+
+      // Assert
+      assert.isTrue(zeroResult);
+      assert.isTrue(tenResult);
+    });
+
+    it('should return true if quality is an int between 0-9 and codec is mp3', () => {
+      // Arrange
+      validOptions.codec = new Mp3();
+      validOptions.quality = 0;
+
+      // Act
+      const zeroResult: boolean = commandLineInputParser.validate(validOptions);
+
+      // Arrange
+      validOptions.quality = 9;
 
       // Act
       const tenResult: boolean = commandLineInputParser.validate(validOptions);
@@ -245,7 +266,7 @@ describe('commandLineInputParser', () => {
       assert.isTrue(isCalled);
     });
 
-    it('should return false if quality is larger than 10', () => {
+    it('should return false if quality is larger than 10 and codec is vorbis', () => {
       // Arrange
       validOptions.quality = 11;
 
@@ -256,7 +277,7 @@ describe('commandLineInputParser', () => {
       assert.isFalse(result);
     });
 
-    it('should print an error message if quality is larger than 10', () => {
+    it('should print an error message if quality is larger than 10 and codec is vorbis', () => {
       // Arrange
       validOptions.quality = 11;
 
@@ -268,6 +289,35 @@ describe('commandLineInputParser', () => {
       const isCalled: boolean = consoleInfoStub.withArgs(
         `lossy-music-mirror: error: argument "-q/--quality": The value ` +
           `must be between 0 and 10`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
+    it('should return false if quality is larger than 9 and codec is mp3', () => {
+      // Arrange
+      validOptions.codec = new Mp3();
+      validOptions.quality = 10;
+
+      // Act
+      const result: boolean = commandLineInputParser.validate(validOptions);
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should print an error message if quality is larger than 9 and codec is mp3', () => {
+      // Arrange
+      validOptions.codec = new Mp3();
+      validOptions.quality = 10;
+
+      // Act
+      commandLineInputParser.validate(validOptions);
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 0 and 9`).called;
       assert.isTrue(isCalledOnce);
       assert.isTrue(isCalled);
     });

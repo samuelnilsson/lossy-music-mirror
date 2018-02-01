@@ -9,7 +9,9 @@ import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as audio from './audio';
 import * as file from './file';
-import { Codec, CommandLineOptions } from './models/CommandLineOptions';
+import { CommandLineOptions } from './models/CommandLineOptions';
+import { Mp3 } from './models/Mp3';
+import { Vorbis } from './models/Vorbis';
 
 describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
@@ -27,7 +29,7 @@ describe('audio', () => {
       pathJoinStub = sinon.stub(path, 'join');
       childProcessStub = sinon.stub(childProcess, 'execSync');
       consoleInfoStub = sinon.stub(console, 'info');
-      validOptions = new CommandLineOptions('any', 5, 'anyInput', Codec.Vorbis);
+      validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis());
       fsExistsStub = sinon.stub(fs, 'existsSync');
     });
 
@@ -81,7 +83,7 @@ describe('audio', () => {
         .returns(`${outputDirectory}test.mp3`);
       fsExistsStub.withArgs(`${outputDirectory}test.mp3`)
         .returns(false);
-      validOptions.codec = Codec.Mp3;
+      validOptions.codec = new Mp3();
 
       // Act
       audio.transcode(testFile, outputDirectory, validOptions);

@@ -10,7 +10,8 @@ import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
 import * as directoryIterator from './directoryIterator';
 import * as file from './file';
-import { Codec, CommandLineOptions } from './models/CommandLineOptions';
+import { CommandLineOptions } from './models/CommandLineOptions';
+import { Vorbis } from './models/Vorbis';
 
 describe('app', () => {
   describe('run', () => {
@@ -40,7 +41,7 @@ describe('app', () => {
       commandLineInputParserValidateStub = sinon.stub(commandLineInputParser, 'validate');
       consoleInfoStub = sinon.stub(console, 'info');
 
-      options = new CommandLineOptions('outputDir', 3, 'inputDir', Codec.Vorbis);
+      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis());
       testData = [
         '/any/musicFile.flac',
         '/any2/musicFile2.flac',
