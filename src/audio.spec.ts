@@ -3,7 +3,7 @@
  */
 
 import { assert } from 'chai';
-import * as childProcess from 'child_process';
+import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
 import * as sinon from 'sinon';
@@ -14,7 +14,7 @@ import { CommandLineOptions } from './models/CommandLineOptions';
 describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
-  let childProcessStub: sinon.SinonStub;
+  let spawnStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
   let fsExistsStub: sinon.SinonStub;
   let fileGetExtensionStub: sinon.SinonStub;
@@ -25,7 +25,7 @@ describe('audio', () => {
     beforeEach(() => {
       pathParseStub = sinon.stub(path, 'parse');
       pathJoinStub = sinon.stub(path, 'join');
-      childProcessStub = sinon.stub(childProcess, 'execSync');
+      spawnStub = sinon.stub(spawn, 'sync');
       consoleInfoStub = sinon.stub(console, 'info');
       validOptions = new CommandLineOptions('any', 5, 'anyInput');
       fsExistsStub = sinon.stub(fs, 'existsSync');
@@ -38,8 +38,8 @@ describe('audio', () => {
       if (pathJoinStub != null) {
         pathJoinStub.restore();
       }
-      if (childProcessStub != null) {
-        childProcessStub.restore();
+      if (spawnStub != null) {
+        spawnStub.restore();
       }
       if (consoleInfoStub != null) {
         consoleInfoStub.restore();
@@ -65,9 +65,17 @@ describe('audio', () => {
       audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
-      const expectedCommand: string = 'ffmpeg -hide_banner -loglevel error -i "/any/test.flac" -c:a libvorbis -q:a 5 -vn "/test/test.ogg"';
-      sinon.assert.calledOnce(childProcessStub);
-      sinon.assert.calledWith(childProcessStub, expectedCommand);
+      const expectedOptions: string[] = [
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-i', '/any/test.flac',
+        '-c:a', 'libvorbis',
+        '-q:a', '5',
+        '-vn',
+        '/test/test.ogg'
+      ];
+      sinon.assert.calledOnce(spawnStub);
+      sinon.assert.calledWith(spawnStub, 'ffmpeg', expectedOptions, { stdio: 'inherit' });
     });
 
     it('should log to the console which file is currently being transcoded', () => {
@@ -107,7 +115,7 @@ describe('audio', () => {
       audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
-      sinon.assert.callOrder(consoleInfoStub, childProcessStub);
+      sinon.assert.callOrder(consoleInfoStub, spawnStub);
     });
 
     it('should not transcode if the output file already exists', () => {
@@ -126,7 +134,7 @@ describe('audio', () => {
       audio.transcode(testFile, outputDirectory, validOptions);
 
       // Assert
-      sinon.assert.notCalled(childProcessStub);
+      sinon.assert.notCalled(spawnStub);
     });
 
     it('should print a message if the output file already exists', () => {
