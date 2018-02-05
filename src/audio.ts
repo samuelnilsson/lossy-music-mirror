@@ -2,7 +2,7 @@
  * Contains functions that performs operations on audio files
  */
 
-import { execSync } from 'child_process';
+import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
 import * as file from './file';
@@ -20,9 +20,16 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
 
   if (!fs.existsSync(outputPath)) {
     console.info(`Converting ${filePath} to ${outputPath}`);
-    const command: string = `ffmpeg -hide_banner -loglevel error -i ` +
-      `"${filePath}" -c:a ${options.codec.encoderLib} -q:a ${options.quality} -vn "${outputPath}"`;
-    execSync(command);
+    const ffmpegOptions: string[] = [
+      '-hide_banner',
+      '-loglevel', 'error',
+      '-i', filePath,
+      '-c:a', options.codec.encoderLib,
+      '-q:a', options.quality.toString(),
+      '-vn',
+      outputPath
+    ];
+    spawn.sync('ffmpeg', ffmpegOptions, { stdio: 'inherit' });
   } else {
     console.info(`Skipping conversion to ${outputPath} since it already exists`);
   }
