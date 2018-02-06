@@ -12,4 +12,5 @@ export class Mp3 implements ICodec {
   public readonly maxQuality: number = 9;
   public readonly extension: string = 'mp3';
   public readonly encoderLib: string = 'libmp3lame';
+  public readonly defaultQuality: number = 4;
 }

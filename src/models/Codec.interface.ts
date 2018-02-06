@@ -7,4 +7,5 @@ export interface ICodec {
   readonly maxQuality: number;
   readonly extension: string;
   readonly encoderLib: string;
+  readonly defaultQuality: number;
 }

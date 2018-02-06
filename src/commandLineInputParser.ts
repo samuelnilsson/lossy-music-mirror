@@ -32,11 +32,6 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
 
   const output: string = parsedArguments.output;
 
-  let quality: number = parsedArguments.quality;
-  if (quality == null) {
-    quality = 3;
-  }
-
   let input: string = parsedArguments.input;
   if (input == null) {
     input = './';
@@ -44,6 +39,11 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
 
   const codecString: string = parsedArguments.codec;
   const codec: ICodec = mapCodec(codecString);
+
+  let quality: number = parsedArguments.quality;
+  if (quality == null) {
+    quality = codec.defaultQuality;
+  }
 
   return new CommandLineOptions(
     output,
@@ -68,7 +68,7 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-q', '--quality' ],
     {
       type: 'int',
-      help: 'The vorbis quality (0-10 [default = 3])'
+      help: 'The vorbis quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
     }
   );
   parser.addArgument(

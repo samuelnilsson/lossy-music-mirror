@@ -83,12 +83,23 @@ describe('commandLineInputParser', () => {
       assert.equal(result.quality, testQuality);
     });
 
-    it('should set the quality to 3 on CommandLineOptions by default', () => {
+    it('should set the quality to 3 on CommandLineOptions by default if codec is vorbis', () => {
       // Act
       const result: CommandLineOptions = commandLineInputParser.parse();
 
       // Assert
       assert.equal(result.quality, 3);
+    });
+
+    it('should set the quality to 4 on CommandLineOptions by default if codec is mp3', () => {
+      // Arrange
+      validParseArgs.codec = 'mp3';
+
+      // Act
+      const result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.equal(result.quality, 4);
     });
 
     it('should initialize the quality argument', () => {
@@ -100,7 +111,7 @@ describe('commandLineInputParser', () => {
         [ '-q', '--quality' ],
         {
           type: 'int',
-          help: 'The vorbis quality (0-10 [default = 3])'
+          help: 'The vorbis quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
         }
       ).calledOnce);
     });
