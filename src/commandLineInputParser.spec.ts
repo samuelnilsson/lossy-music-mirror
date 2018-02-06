@@ -111,7 +111,7 @@ describe('commandLineInputParser', () => {
         [ '-q', '--quality' ],
         {
           type: 'int',
-          help: 'The vorbis quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
+          help: 'The output quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
         }
       ).calledOnce);
     });
