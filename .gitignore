@@ -7,3 +7,4 @@ coverage/
 # Editor files
 *.swp
 .vimrc
+.nvimrc

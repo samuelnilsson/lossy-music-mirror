@@ -5,8 +5,8 @@
   "bin": {
     "lossy-music-mirror": "./build/index.js"
   },
-  "start": "node build/index.js",
   "scripts": {
+    "start": "node build/index.js",
     "test": "npm run compile && npm run testscript && npm run lint",
     "testscript": "nyc mocha",
     "coveragereport": "nyc report --reporter=text-lcov | coveralls",

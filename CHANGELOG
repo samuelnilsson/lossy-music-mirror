@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- An output codec option
+- Possibility to set output codec to mp3
 
 ## 0.1.0
 ### Added

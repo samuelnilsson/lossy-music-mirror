@@ -10,6 +10,8 @@ import * as sinon from 'sinon';
 import * as audio from './audio';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { Mp3 } from './models/Mp3';
+import { Vorbis } from './models/Vorbis';
 
 describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
@@ -27,7 +29,7 @@ describe('audio', () => {
       pathJoinStub = sinon.stub(path, 'join');
       spawnStub = sinon.stub(spawn, 'sync');
       consoleInfoStub = sinon.stub(console, 'info');
-      validOptions = new CommandLineOptions('any', 5, 'anyInput');
+      validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis());
       fsExistsStub = sinon.stub(fs, 'existsSync');
     });
 
@@ -76,6 +78,36 @@ describe('audio', () => {
       ];
       sinon.assert.calledOnce(spawnStub);
       sinon.assert.calledWith(spawnStub, 'ffmpeg', expectedOptions, { stdio: 'inherit' });
+    });
+
+    it('should transcode the file into mp3 if that option is set', () => {
+      // Arrange
+      const testFile: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(testFile).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.mp3')
+        .returns(`${outputDirectory}test.mp3`);
+      fsExistsStub.withArgs(`${outputDirectory}test.mp3`)
+        .returns(false);
+      validOptions.codec = new Mp3();
+
+      // Act
+      audio.transcode(testFile, outputDirectory, validOptions);
+
+      // Assert
+      const expectedOptions: string[] = [
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-i', '/any/test.flac',
+        '-c:a', 'libmp3lame',
+        '-q:a', '5',
+        '-vn',
+        '/test/test.mp3'
+      ];
+      sinon.assert.calledOnce(spawnStub);
+      sinon.assert.calledWith(spawnStub, 'ffmpeg', expectedOptions);
     });
 
     it('should log to the console which file is currently being transcoded', () => {

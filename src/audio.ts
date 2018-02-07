@@ -2,7 +2,6 @@
  * Contains functions that performs operations on audio files
  */
 
-import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
@@ -17,14 +16,15 @@ import { CommandLineOptions } from './models/CommandLineOptions';
  */
 function transcode(filePath: string, outputDirectory: string, options: CommandLineOptions): void {
   const fileName: string = path.parse(filePath).name;
-  const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
+  const outputPath: string = path.join(outputDirectory, `${fileName}.${options.codec.extension}`);
+
   if (!fs.existsSync(outputPath)) {
     console.info(`Converting ${filePath} to ${outputPath}`);
     const ffmpegOptions: string[] = [
       '-hide_banner',
       '-loglevel', 'error',
       '-i', filePath,
-      '-c:a', 'libvorbis',
+      '-c:a', options.codec.encoderLib,
       '-q:a', options.quality.toString(),
       '-vn',
       outputPath

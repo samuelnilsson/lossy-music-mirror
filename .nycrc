@@ -1,5 +1,5 @@
 {
-  "exclude": ["src/**/*.spec.ts","gulpfile.js"],
+  "exclude": ["src/**/*.spec.ts", "src/models/*.interface.ts", "gulpfile.js"],
   "include": ["src/**/*.ts"],
   "all": true,
   "extension": [
