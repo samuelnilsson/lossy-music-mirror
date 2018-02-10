@@ -2,14 +2,20 @@
  * Contains functions that performs operations on audio files
  */
 
+import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
-import * as file from './file';
+import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { Flac } from './models/Flac';
+import { Mp3 } from './models/Mp3';
+import { Vorbis } from './models/Vorbis';
+
+const self: any = exports;
 
 /**
- * Transcodes the file into ogg vorbis and writes it to outputDirectory.
+ * Transcodes the file according to the options and writes it to outputDirectory.
  * @param file            - The path to the file to transcode.
  * @param outputDirectory - The directory to write the transcoded file to.
  * @param options         - Options from the command line.
@@ -37,18 +43,55 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
 
 /**
  * Determines if a file is a lossless audio file.
- * @param  The file.
+ * @param   The path to the file.
  * @returns True if the file is a lossless audio file and false otherwise.
  */
 function isLossless(filePath: string): boolean {
-  const LOSSLESS_EXTENSIONS: string[] = ['flac'];
+  const codec: ICodec = self.getCodec(filePath);
 
-  return LOSSLESS_EXTENSIONS.some((extension: string) => {
-    return extension === file.getExtension(filePath);
-  });
+  return codec !== null ? codec.isLossless : null;
+}
+
+/**
+ * Determines the audio codec of a file.
+ * @param   The file.
+ * @returns The audio codec of the file or null if the codec is not supported or the
+ *          file is not an audio file.
+ */
+function getCodec(filePath: string): ICodec {
+  const ffprobeOptions: string[] = [
+    '-v', 'error',
+    '-select_streams', 'a:0',
+    '-show_entries', 'stream=codec_name',
+    '-of', 'default=nokey=1:noprint_wrappers=1',
+    filePath
+  ];
+  const cmdResult: SpawnSyncReturns<Buffer> = spawn.sync('ffprobe', ffprobeOptions, { stdio: 'pipe' });
+
+  const successExitCode: number = 0;
+
+  if (cmdResult.status !== successExitCode) {
+    return null;
+  } else {
+    const cmdOutput: string = String(cmdResult.stdout).trim();
+    switch (cmdOutput) {
+      case (new Mp3().ffmpegName): {
+        return new Mp3();
+      }
+      case (new Vorbis().ffmpegName): {
+        return new Vorbis();
+      }
+      case (new Flac().ffmpegName): {
+        return new Flac();
+      }
+      default:
+        return null;
+    }
+  }
 }
 
 export {
   transcode,
-  isLossless
+  isLossless,
+  getCodec
 };

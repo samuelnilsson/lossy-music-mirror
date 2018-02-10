@@ -4,8 +4,8 @@
 
 import { ArgumentParser, ArgumentParserOptions } from 'argparse';
 import * as file from './file';
-import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { LossyCodec } from './models/LossyCodec';
 import { Mp3 } from './models/Mp3';
 import { Vorbis } from './models/Vorbis';
 
@@ -38,7 +38,7 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
   }
 
   const codecString: string = parsedArguments.codec;
-  const codec: ICodec = mapCodec(codecString);
+  const codec: LossyCodec = mapCodec(codecString);
 
   let quality: number = parsedArguments.quality;
   if (quality == null) {
@@ -94,7 +94,7 @@ function initializeOptions(parser: ArgumentParser): void {
  * validation error messages to the console.
  * @returns True if the validation succeeded and false otherwise.
  */
-function validQuality(quality: number, codec: ICodec): boolean {
+function validQuality(quality: number, codec: LossyCodec): boolean {
   if (quality < codec.minQuality || quality > codec.maxQuality) {
     console.info(`lossy-music-mirror: error: argument "-q/--quality": The ` +
                  `value must be between ${codec.minQuality} and ${codec.maxQuality}`);
@@ -135,7 +135,7 @@ function isDecimal(n: number): boolean {
   return n % 1 !== 0;
 }
 
-function mapCodec(codec: string): ICodec {
+function mapCodec(codec: string): LossyCodec {
   switch (codec) {
     case 'mp3': {
       return new Mp3();

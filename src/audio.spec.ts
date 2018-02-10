@@ -3,13 +3,15 @@
  */
 
 import { assert } from 'chai';
+import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as audio from './audio';
-import * as file from './file';
+import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
 import { Vorbis } from './models/Vorbis';
 
@@ -19,38 +21,41 @@ describe('audio', () => {
   let spawnStub: sinon.SinonStub;
   let consoleInfoStub: sinon.SinonStub;
   let fsExistsStub: sinon.SinonStub;
-  let fileGetExtensionStub: sinon.SinonStub;
+  let getCodecStub: sinon.SinonStub;
 
   let validOptions: CommandLineOptions;
 
+  beforeEach(() => {
+    pathParseStub = sinon.stub(path, 'parse');
+    pathJoinStub = sinon.stub(path, 'join');
+    spawnStub = sinon.stub(spawn, 'sync');
+    consoleInfoStub = sinon.stub(console, 'info');
+    validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis());
+    fsExistsStub = sinon.stub(fs, 'existsSync');
+  });
+
+  afterEach(() => {
+    if (pathParseStub != null) {
+      pathParseStub.restore();
+    }
+    if (pathJoinStub != null) {
+      pathJoinStub.restore();
+    }
+    if (spawnStub != null) {
+      spawnStub.restore();
+    }
+    if (consoleInfoStub != null) {
+      consoleInfoStub.restore();
+    }
+    if (fsExistsStub != null) {
+      fsExistsStub.restore();
+    }
+    if (getCodecStub != null) {
+      getCodecStub.restore();
+    }
+  });
+
   describe('transcode', () => {
-    beforeEach(() => {
-      pathParseStub = sinon.stub(path, 'parse');
-      pathJoinStub = sinon.stub(path, 'join');
-      spawnStub = sinon.stub(spawn, 'sync');
-      consoleInfoStub = sinon.stub(console, 'info');
-      validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis());
-      fsExistsStub = sinon.stub(fs, 'existsSync');
-    });
-
-    afterEach(() => {
-      if (pathParseStub != null) {
-        pathParseStub.restore();
-      }
-      if (pathJoinStub != null) {
-        pathJoinStub.restore();
-      }
-      if (spawnStub != null) {
-        spawnStub.restore();
-      }
-      if (consoleInfoStub != null) {
-        consoleInfoStub.restore();
-      }
-      if (fsExistsStub != null) {
-        fsExistsStub.restore();
-      }
-    });
-
     it('should transcode the file into ogg using ffmpeg and the provided options', () => {
       // Arrange
       const testFile: string = '/any/test.flac';
@@ -194,19 +199,13 @@ describe('audio', () => {
 
   describe('isLossless', () => {
     beforeEach(() => {
-      fileGetExtensionStub = sinon.stub(file, 'getExtension');
+      getCodecStub = sinon.stub(audio, 'getCodec');
     });
 
-    afterEach(() => {
-      if (fileGetExtensionStub != null) {
-        fileGetExtensionStub.restore();
-      }
-    });
-
-    it('should return true if the file extension is flac', () => {
+    it('should return true if the codec is flac', () => {
       // Arrange
       const testFlacPath: string = '/any/file.flac';
-      fileGetExtensionStub.withArgs(testFlacPath).returns('flac');
+      getCodecStub.withArgs(testFlacPath).returns(new Flac());
 
       // Act
       const result: boolean = audio.isLossless(testFlacPath);
@@ -215,16 +214,143 @@ describe('audio', () => {
       assert.isTrue(result);
     });
 
-    it('should return false if file is not lossless', () => {
+    it('should return false if the codec is mp3', () => {
       // Arrange
-      const testFlacPath: string = '/any/file.notlossless';
-      fileGetExtensionStub.withArgs(testFlacPath).returns('notlossless');
+      const testMp3Path: string = '/any/file.mp3';
+      getCodecStub.withArgs(testMp3Path).returns(new Mp3());
 
       // Act
-      const result: boolean = audio.isLossless(testFlacPath);
+      const result: boolean = audio.isLossless(testMp3Path);
 
       // Assert
       assert.isFalse(result);
+    });
+
+    it('should return false if the codec is vorbis', () => {
+      // Arrange
+      const testVorbisPath: string = '/any/file.ogg';
+      getCodecStub.withArgs(testVorbisPath).returns(new Vorbis());
+
+      // Act
+      const result: boolean = audio.isLossless(testVorbisPath);
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should return null if the codec could not be determined', () => {
+      // Arrange
+      const testPath: string = '/any/file.nonsupported';
+      getCodecStub.withArgs(testPath).returns(null);
+
+      // Act
+      const result: boolean = audio.isLossless(testPath);
+
+      // Assert
+      assert.isNull(result);
+    });
+  });
+
+  describe('getCodec', () => {
+    let defaultOptions: string[];
+
+    beforeEach(() => {
+      defaultOptions = [
+        '-v', 'error',
+        '-select_streams', 'a:0',
+        '-show_entries', 'stream=codec_name',
+        '-of', 'default=nokey=1:noprint_wrappers=1'
+      ];
+    });
+
+    it('should return an instance of Mp3 if the codec is mp3', () => {
+      // Arrange
+      const testMp3Path: string = '/any/file.mp3';
+      defaultOptions.push(testMp3Path);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('mp3\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testMp3Path);
+
+      // Assert
+      assert.isTrue(result instanceof Mp3);
+    });
+
+    it('should return an instance of Vorbis if the codec is vorbis', () => {
+      // Arrange
+      const testVorbisPath: string = '/any/file.ogg';
+      defaultOptions.push(testVorbisPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('vorbis\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testVorbisPath);
+
+      // Assert
+      assert.isTrue(result instanceof Vorbis);
+    });
+
+    it('should return an instance of Flac if the codec is flac', () => {
+      // Arrange
+      const testFlacPath: string = '/any/file.flac';
+      defaultOptions.push(testFlacPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('flac\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testFlacPath);
+
+      // Assert
+      assert.isTrue(result instanceof Flac);
+    });
+
+    it('should return null if the exit status code is not 0', () => {
+      // Arrange
+      const testPath: string = '/any/file.any';
+      defaultOptions.push(testPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 1
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testPath);
+
+      // Assert
+      assert.isNull(result);
+    });
+
+    it('should return null if the codec is not supported', () => {
+      // Arrange
+      const testPath: string = '/any/file.any';
+      defaultOptions.push(testPath);
+      const unknownFFmpegCodecName: string = 'unsupported';
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from(`${unknownFFmpegCodecName}\n`)
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testPath);
+
+      // Assert
+      assert.isNull(result);
     });
   });
 });
