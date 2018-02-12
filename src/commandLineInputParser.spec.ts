@@ -128,14 +128,6 @@ describe('commandLineInputParser', () => {
       assert.equal(result.input, testInput);
     });
 
-    it('should set the input directory to the current directory by default', () => {
-      // Act
-      const result: CommandLineOptions = commandLineInputParser.parse();
-
-      // Assert
-      assert.equal(result.input, './');
-    });
-
     it('should initialize the input directory argument', () => {
       // Act
       const result: CommandLineOptions = commandLineInputParser.parse();
@@ -145,7 +137,8 @@ describe('commandLineInputParser', () => {
         [ '-i', '--input' ],
         {
           type: 'string',
-          help: 'The input directory path [default = ./]'
+          help: 'The input directory path [default = ./]',
+          defaultValue: './'
         }
       ).calledOnce);
     });

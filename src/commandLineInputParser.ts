@@ -32,10 +32,7 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
 
   const output: string = parsedArguments.output;
 
-  let input: string = parsedArguments.input;
-  if (input == null) {
-    input = './';
-  }
+  const input: string = parsedArguments.input;
 
   const codecString: string = parsedArguments.codec;
   const codec: LossyCodec = mapCodec(codecString);
@@ -75,7 +72,8 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-i', '--input' ],
     {
       type: 'string',
-      help: 'The input directory path [default = ./]'
+      help: 'The input directory path [default = ./]',
+      defaultValue: './'
     }
   );
   parser.addArgument(
