@@ -16,7 +16,7 @@ npm install -g lossy-music-mirror
 ```
 
 ### Usage
-For minimal usage the output path is required. Then the input directory will be the directory you are currently positioned in. For example, the following command will transcode every flac file in the source directory (and its subdirectories) into vorbis and output the resulting files in ./output keeping the directory and file structure of the source:
+For minimal usage the output path is required. Then the input directory will be the directory you are currently positioned in. For example, the following command will transcode every lossless file (of codec Flac, Ape, Apple lossless, WMA lossless, WavPack or TrueAudio) in the source directory (and its subdirectories) into vorbis and output the resulting files in ./output keeping the directory and file structure of the source:
 
 ```
 lossy-music-mirror /home/output
