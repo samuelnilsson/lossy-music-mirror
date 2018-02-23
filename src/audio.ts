@@ -6,11 +6,16 @@ import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
+import { Ape } from './models/Ape';
+import { AppleLossless } from './models/AppleLossless';
 import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
 import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
+import { TrueAudio } from './models/TrueAudio';
 import { Vorbis } from './models/Vorbis';
+import { WavPack } from './models/WavPack';
+import { WmaLossless } from './models/WmaLossless';
 
 const self: any = exports;
 
@@ -83,6 +88,21 @@ function getCodec(filePath: string): ICodec {
       }
       case (new Flac().ffmpegName): {
         return new Flac();
+      }
+      case (new Ape().ffmpegName): {
+        return new Ape();
+      }
+      case (new AppleLossless().ffmpegName): {
+        return new AppleLossless();
+      }
+      case (new WmaLossless().ffmpegName): {
+        return new WmaLossless();
+      }
+      case (new WavPack().ffmpegName): {
+        return new WavPack();
+      }
+      case (new TrueAudio().ffmpegName): {
+        return new TrueAudio();
       }
       default:
         return null;
