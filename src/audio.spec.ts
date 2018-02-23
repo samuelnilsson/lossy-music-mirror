@@ -9,11 +9,16 @@ import * as fs from 'fs-extra';
 import * as path from 'path-extra';
 import * as sinon from 'sinon';
 import * as audio from './audio';
+import { Ape } from './models/Ape';
+import { AppleLossless } from './models/AppleLossless';
 import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
 import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
+import { TrueAudio } from './models/TrueAudio';
 import { Vorbis } from './models/Vorbis';
+import { WavPack } from './models/WavPack';
+import { WmaLossless } from './models/WmaLossless';
 
 describe('audio', () => {
   let pathParseStub: sinon.SinonStub;
@@ -315,6 +320,96 @@ describe('audio', () => {
 
       // Assert
       assert.isTrue(result instanceof Flac);
+    });
+
+    it('should return an instance of Ape if the codec is ape', () => {
+      // Arrange
+      const testApePath: string = '/any/file.ape';
+      defaultOptions.push(testApePath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('ape\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testApePath);
+
+      // Assert
+      assert.isTrue(result instanceof Ape);
+    });
+
+    it('should return an instance of AppleLossless if the codec is apple lossless', () => {
+      // Arrange
+      const testALACPath: string = '/any/file.m4a';
+      defaultOptions.push(testALACPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('alac\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testALACPath);
+
+      // Assert
+      assert.isTrue(result instanceof AppleLossless);
+    });
+
+    it('should return an instance of WmaLossless if the codec is wma lossless', () => {
+      // Arrange
+      const testWmaLosslessPath: string = '/any/file.wma';
+      defaultOptions.push(testWmaLosslessPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('wmalossless\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testWmaLosslessPath);
+
+      // Assert
+      assert.isTrue(result instanceof WmaLossless);
+    });
+
+    it('should return an instance of WavPack if the codec is wavpack', () => {
+      // Arrange
+      const testWavPackPath: string = '/any/file.wv';
+      defaultOptions.push(testWavPackPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('wavpack\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testWavPackPath);
+
+      // Assert
+      assert.isTrue(result instanceof WavPack);
+    });
+
+    it('should return an instance of TrueAudio if the codec is true audio', () => {
+      // Arrange
+      const testTrueAudioPath: string = '/any/file.tta';
+      defaultOptions.push(testTrueAudioPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('tta\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testTrueAudioPath);
+
+      // Assert
+      assert.isTrue(result instanceof TrueAudio);
     });
 
     it('should return null if the exit status code is not 0', () => {
