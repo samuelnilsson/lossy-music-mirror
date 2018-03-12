@@ -448,4 +448,31 @@ describe('audio', () => {
       assert.isNull(result);
     });
   });
+
+  describe('isSameCodec', () => {
+    it('should return true if the codecs are the same', () => {
+      // Arrange
+      const vorbis: ICodec = new Vorbis();
+
+      // Act
+      const result: boolean = audio.isSameCodec(vorbis, vorbis);
+
+      // Assert
+      assert.isTrue(result);
+    });
+
+    it('should return false if the codecs are different', () => {
+      // Arrange
+      const vorbis: ICodec = new Vorbis();
+      const mp3: ICodec = new Mp3();
+
+      // Act
+      const result1: boolean = audio.isSameCodec(vorbis, mp3);
+      const result2: boolean = audio.isSameCodec(mp3, vorbis);
+
+      // Assert
+      assert.isFalse(result1);
+      assert.isFalse(result2);
+    });
+  });
 });

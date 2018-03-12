@@ -14,14 +14,18 @@ describe('file', () => {
   let fsEnsureDirStub: sinon.SinonStub;
   let fsLstatStub: sinon.SinonStub;
   let fsReadDirStub: sinon.SinonStub;
+  let fsRemoveSyncStub: sinon.SinonStub;
   let fileIsDirectoryStub: sinon.SinonStub;
   let fileGetDirectoryStub: sinon.SinonStub;
+  let fileGetFileNameStub: sinon.SinonStub;
+  let fileGetFilesStub: sinon.SinonStub;
 
   beforeEach(() => {
     fsExistsStub = sinon.stub(fs, 'existsSync');
     fsEnsureDirStub = sinon.stub(fs, 'ensureDirSync');
     fsLstatStub = sinon.stub(fs, 'lstatSync');
     fsReadDirStub = sinon.stub(fs, 'readdirSync');
+    fsRemoveSyncStub = sinon.stub(fs, 'removeSync');
   });
 
   describe('getAbsolutePath', () => {
@@ -208,6 +212,70 @@ describe('file', () => {
     });
   });
 
+  describe('getFilename', () => {
+    it('should return the name of the file or directory', () => {
+      // Arrange
+      const testPath: string = '/any/name.ext';
+      pathStub = sinon.stub(path, 'parse');
+      pathStub.withArgs(testPath).returns({
+        name: 'name'
+      });
+
+      // Act
+      const result: string = file.getFilename(testPath);
+
+      // Assert
+      assert.deepEqual(result, 'name');
+    });
+  });
+
+  describe('deleteFiles', () => {
+    it('should delete the specified files and directories', () => {
+      // Arrange
+      const testFiles: string[] = [
+        '/any/file',
+        '/any/dir'
+      ];
+
+      // Act
+      file.deleteFiles(testFiles);
+
+      // Assert
+      assert.isTrue(fsRemoveSyncStub.withArgs(testFiles[0]).calledOnce);
+      assert.isTrue(fsRemoveSyncStub.withArgs(testFiles[1]).calledOnce);
+    });
+  });
+
+  describe('getFilesByFilename', () => {
+    it('should return the files in the directory that has the provided filename', () => {
+      // Arrange
+      const testDirectory: string = 'testdir';
+      const testFilename: string = 'testname';
+      const testDirectoryFiles: string[] = [
+        'testname.a',
+        'othername.b',
+        'testname.c'
+      ];
+
+      fileGetFilesStub = sinon.stub(file, 'getFiles');
+      fileGetFilesStub.withArgs(testDirectory).returns(testDirectoryFiles);
+
+      fileGetFileNameStub = sinon.stub(file, 'getFilename');
+      fileGetFileNameStub.withArgs(testDirectoryFiles[0]).returns(testFilename);
+      fileGetFileNameStub.withArgs(testDirectoryFiles[1]).returns('othername');
+      fileGetFileNameStub.withArgs(testDirectoryFiles[2]).returns(testFilename);
+
+      // Act
+      const result: string[] = file.getFilesByFilename(testDirectory, testFilename);
+
+      // Assert
+      assert.deepEqual(result, [
+        'testname.a',
+        'testname.c'
+      ]);
+    });
+  });
+
   afterEach(() => {
     if (pathStub != null) {
       pathStub.restore();
@@ -229,6 +297,15 @@ describe('file', () => {
     }
     if (fileGetDirectoryStub != null) {
       fileGetDirectoryStub.restore();
+    }
+    if (fsRemoveSyncStub != null) {
+      fsRemoveSyncStub.restore();
+    }
+    if (fileGetFileNameStub != null) {
+      fileGetFileNameStub.restore();
+    }
+    if (fileGetFilesStub != null) {
+      fileGetFilesStub.restore();
     }
   });
 });

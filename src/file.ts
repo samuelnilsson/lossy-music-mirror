@@ -50,10 +50,10 @@ function getDirectory(filePath: string): string {
  * @returns The paths to the files and directories in the directory.
  */
 function getFiles(directoryPath: string): string[] {
-  const fileNamesInPath: string[] = fs.readdirSync(directoryPath);
+  const filenamesInPath: string[] = fs.readdirSync(directoryPath);
 
-  return fileNamesInPath.map<string>((fileName: string) => {
-    return path.join(directoryPath, fileName);
+  return filenamesInPath.map<string>((filename: string) => {
+    return path.join(directoryPath, filename);
   });
 }
 
@@ -85,6 +85,43 @@ function createDirectory(directory: string): void {
   }
 }
 
+/**
+ * Determines the file name of the file or directory specified in filePath.
+ * @param   The path to the file or directory.
+ * @returns The name of the file or directory specified in filePath.
+ */
+function getFilename(filePath: string): string {
+  return path.parse(filePath).name;
+}
+
+/**
+ * Deletes the files and directories in filePaths.
+ * @param   The paths to the files and/or directories.
+ */
+function deleteFiles(filePaths: string[]): void {
+  filePaths.forEach((f: string) => {
+    fs.removeSync(f);
+  });
+}
+
+/**
+ * Finds the files in inDirectory that has the same filename as filename.
+ * @param   inDirectory The directory in which to search.
+ * @returns filename    The file or directory name to search for.
+ */
+function getFilesByFilename(inDirectory: string, filename: string): string[] {
+  const result: string[] = [];
+
+  const files: string[] = self.getFiles(inDirectory);
+  files.forEach((f: string) => {
+    if (self.getFilename(f) === filename) {
+      result.push(f);
+    }
+  });
+
+  return result;
+}
+
 export {
   getAbsolutePath,
   isDirectory,
@@ -92,5 +129,8 @@ export {
   getDirectory,
   getFiles,
   getRelativePath,
-  createDirectory
+  createDirectory,
+  getFilename,
+  deleteFiles,
+  getFilesByFilename
 };
