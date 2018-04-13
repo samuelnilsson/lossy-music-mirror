@@ -35,7 +35,7 @@ describe('audio', () => {
     pathJoinStub = sinon.stub(path, 'join');
     spawnStub = sinon.stub(spawn, 'sync');
     consoleInfoStub = sinon.stub(console, 'info');
-    validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis());
+    validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis(), false);
     fsExistsStub = sinon.stub(fs, 'existsSync');
   });
 

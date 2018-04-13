@@ -37,6 +37,8 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
   const codecString: string = parsedArguments.codec;
   const codec: LossyCodec = mapCodec(codecString);
 
+  const deleteFiles: boolean = parsedArguments.deleteFiles;
+
   let quality: number = parsedArguments.quality;
   if (quality == null) {
     quality = codec.defaultQuality;
@@ -46,7 +48,8 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
     output,
     quality,
     input,
-    codec
+    codec,
+    deleteFiles
   );
 }
 
@@ -83,6 +86,15 @@ function initializeOptions(parser: ArgumentParser): void {
       help: 'The output codec [default = vorbis]',
       defaultValue: 'vorbis',
       choices: ['vorbis', 'mp3']
+    }
+  );
+  parser.addArgument(
+    [ '--delete' ],
+    {
+      help: 'Delete files in output that does not have a corresponding lossless file in input',
+      dest: 'deleteFiles',
+      action: 'storeTrue',
+      defaultValue: false
     }
   );
 }

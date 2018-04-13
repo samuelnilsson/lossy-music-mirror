@@ -70,7 +70,7 @@ describe('app', () => {
       getFilesToDeleteStub = sandbox.stub(app, 'getFilesToDelete');
       askUserForDeleteStub = sandbox.stub(app, 'askUserForDelete');
 
-      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis());
+      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false);
       commandLineInputParserValidateStub.withArgs(options).returns(true);
 
       filesToDeleteTestResponse = [
@@ -312,7 +312,7 @@ describe('app', () => {
       countNumberOfLosslessFilesStub = sandbox.stub(app, 'countNumberOfLosslessFiles');
       countNumberOfLosslessFilesStub.withArgs('inputDir').returns(2);
 
-      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis());
+      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false);
       testData = [
         '/any/musicFile.flac',
         '/any2/musicFile2.flac',
