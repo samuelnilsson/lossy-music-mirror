@@ -13,4 +13,10 @@ const options: CommandLineOptions = commandLineInputParser.parse({
   addHelp: true
 });
 
-app.run(options);
+app.run(options)
+  .then(() => {
+    process.exit();
+  })
+  .catch((err: Error) => {
+    throw(err);
+  });

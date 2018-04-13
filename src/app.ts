@@ -3,6 +3,8 @@
  */
 
 import * as fs from 'fs-extra';
+import * as inquirer from 'inquirer';
+import { Answers } from 'inquirer';
 import * as path from 'path';
 import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
@@ -13,14 +15,19 @@ import { CommandLineOptions } from './models/CommandLineOptions';
 
 const self: any = exports;
 
-function run(options: CommandLineOptions): void {
+async function run(options: CommandLineOptions): Promise<void> {
   if (!commandLineInputParser.validate(options)) {
     console.info('Validation failed.');
   } else {
     const filesToDelete: string[] = self.getFilesToDelete(options.input, options.output, options.codec);
-    file.deleteFiles(filesToDelete);
 
-    self.startTranscode(options);
+    const shouldDelete: boolean = await self.askUserForDelete(filesToDelete);
+    if (shouldDelete) {
+      file.deleteFiles(filesToDelete);
+      self.startTranscode(options);
+    } else {
+      console.info('Exiting.');
+    }
   }
 }
 
@@ -80,9 +87,32 @@ function startTranscode(options: CommandLineOptions): void {
   });
 }
 
+async function askUserForDelete(files: string[]): Promise<boolean> {
+  if (files.length === 0) {
+    return true;
+  }
+
+  files.forEach((f: string) => {
+    console.info(f);
+  });
+
+  const question: inquirer.Question = {
+    type: 'confirm',
+    name: 'confirmDelete',
+    message: 'The files listed above will be deleted. Are you sure you want to continue?'
+  };
+
+  const answer: Answers = await inquirer.prompt(question);
+
+  /* tslint:disable:no-string-literal */
+  return answer['confirmDelete'];
+  /* tslint:enable:no-string-literal */
+}
+
 export {
   run,
   getFilesToDelete,
   countNumberOfLosslessFiles,
-  startTranscode
+  startTranscode,
+  askUserForDelete
 };

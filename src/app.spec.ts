@@ -4,8 +4,11 @@
 
 import { assert } from 'chai';
 import * as fs from 'fs-extra';
+import * as inquirer from 'inquirer';
+import { Question } from 'inquirer';
 import * as path from 'path';
 import * as sinon from 'sinon';
+import { SinonSandbox, SinonStub } from 'sinon';
 import * as app from './app';
 import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
@@ -16,50 +19,56 @@ import { Mp3 } from './models/Mp3';
 import { Vorbis } from './models/Vorbis';
 
 describe('app', () => {
-  let directoryIteratorStub: sinon.SinonStub;
-  let audioTranscodeStub: sinon.SinonStub;
-  let audioIsLosslessStub: sinon.SinonStub;
-  let pathJoinStub: sinon.SinonStub;
-  let fileGetRelativePathStub: sinon.SinonStub;
-  let fileCreateDirectoryStub: sinon.SinonStub;
-  let commandLineInputParserValidateStub: sinon.SinonStub;
-  let consoleInfoStub: sinon.SinonStub;
-  let getFilesToDeleteStub: sinon.SinonStub;
-  let fileDeleteFilesStub: sinon.SinonStub;
-  let startTranscodeStub: sinon.SinonStub;
-  let processStdoutStub: sinon.SinonStub;
-  let fileGetFilesByFileNameStub: sinon.SinonStub;
-  let fileGetFileNameStub: sinon.SinonStub;
-  let audioGetCodecStub: sinon.SinonStub;
-  let audioIsSameCodecStub: sinon.SinonStub;
-  let fsExistsSyncStub: sinon.SinonStub;
-  let countNumberOfLosslessFilesStub: sinon.SinonStub;
+  let sandbox: SinonSandbox;
+  let directoryIteratorStub: SinonStub;
+  let audioTranscodeStub: SinonStub;
+  let audioIsLosslessStub: SinonStub;
+  let pathJoinStub: SinonStub;
+  let fileGetRelativePathStub: SinonStub;
+  let fileCreateDirectoryStub: SinonStub;
+  let commandLineInputParserValidateStub: SinonStub;
+  let consoleInfoStub: SinonStub;
+  let getFilesToDeleteStub: SinonStub;
+  let fileDeleteFilesStub: SinonStub;
+  let startTranscodeStub: SinonStub;
+  let askUserForDeleteStub: SinonStub;
+  let processStdoutStub: SinonStub;
+  let fileGetFilesByFileNameStub: SinonStub;
+  let fileGetFileNameStub: SinonStub;
+  let audioGetCodecStub: SinonStub;
+  let audioIsSameCodecStub: SinonStub;
+  let fsExistsSyncStub: SinonStub;
+  let countNumberOfLosslessFilesStub: SinonStub;
+  let inquirerPromptStub: SinonStub;
 
   let testData: string[];
   let options: CommandLineOptions;
 
   beforeEach(() => {
-    audioTranscodeStub = sinon.stub(audio, 'transcode');
-    audioIsLosslessStub = sinon.stub(audio, 'isLossless');
-    pathJoinStub = sinon.stub(path, 'join');
-    fileGetRelativePathStub = sinon.stub(file, 'getRelativePath');
-    fileCreateDirectoryStub = sinon.stub(file, 'createDirectory');
-    commandLineInputParserValidateStub = sinon.stub(commandLineInputParser, 'validate');
-    consoleInfoStub = sinon.stub(console, 'info');
-    fileDeleteFilesStub = sinon.stub(file, 'deleteFiles');
-    fileGetFilesByFileNameStub = sinon.stub(file, 'getFilesByFilename');
-    fileGetFileNameStub = sinon.stub(file, 'getFilename');
-    audioGetCodecStub = sinon.stub(audio, 'getCodec');
-    audioIsSameCodecStub = sinon.stub(audio, 'isSameCodec');
-    fsExistsSyncStub = sinon.stub(fs, 'existsSync');
+    sandbox = sinon.sandbox.create();
+    audioTranscodeStub = sandbox.stub(audio, 'transcode');
+    audioIsLosslessStub = sandbox.stub(audio, 'isLossless');
+    pathJoinStub = sandbox.stub(path, 'join');
+    fileGetRelativePathStub = sandbox.stub(file, 'getRelativePath');
+    fileCreateDirectoryStub = sandbox.stub(file, 'createDirectory');
+    commandLineInputParserValidateStub = sandbox.stub(commandLineInputParser, 'validate');
+    consoleInfoStub = sandbox.stub(console, 'info');
+    fileDeleteFilesStub = sandbox.stub(file, 'deleteFiles');
+    fileGetFilesByFileNameStub = sandbox.stub(file, 'getFilesByFilename');
+    fileGetFileNameStub = sandbox.stub(file, 'getFilename');
+    audioGetCodecStub = sandbox.stub(audio, 'getCodec');
+    audioIsSameCodecStub = sandbox.stub(audio, 'isSameCodec');
+    fsExistsSyncStub = sandbox.stub(fs, 'existsSync');
+    inquirerPromptStub = sandbox.stub(inquirer, 'prompt');
   });
 
   describe('run', () => {
     let filesToDeleteTestResponse: string[];
 
     beforeEach(() => {
-      startTranscodeStub = sinon.stub(app, 'startTranscode');
-      getFilesToDeleteStub = sinon.stub(app, 'getFilesToDelete');
+      startTranscodeStub = sandbox.stub(app, 'startTranscode');
+      getFilesToDeleteStub = sandbox.stub(app, 'getFilesToDelete');
+      askUserForDeleteStub = sandbox.stub(app, 'askUserForDelete');
 
       options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis());
       commandLineInputParserValidateStub.withArgs(options).returns(true);
@@ -71,22 +80,23 @@ describe('app', () => {
       getFilesToDeleteStub
         .withArgs(options.input, options.output, options.codec)
         .returns(filesToDeleteTestResponse);
+      askUserForDeleteStub.withArgs(filesToDeleteTestResponse).resolves(true);
     });
 
-    it('should validate the options', () => {
+    it('should validate the options', async () => {
       // Act
-      app.run(options);
+      await app.run(options);
 
       // Assert
       assert.isTrue(consoleInfoStub.withArgs('Validation failed.').notCalled);
     });
 
-    it('should print a validation failure message and exit if options validation fails', () => {
+    it('should print a validation failure message and exit if options validation fails', async () => {
       // Arrange
       commandLineInputParserValidateStub.withArgs(options).returns(false);
 
       // Act
-      app.run(options);
+      await app.run(options);
 
       // Assert
       assert.isTrue(consoleInfoStub.calledWith('Validation failed.'));
@@ -95,26 +105,51 @@ describe('app', () => {
       assert.isTrue(startTranscodeStub.notCalled);
     });
 
-    it('should delete files returned by getFilesToDelete', () => {
+    it('should ask the user before deleting files', async () => {
+      // Arrange
+      askUserForDeleteStub.withArgs(filesToDeleteTestResponse).resolves(true);
+
       // Act
-      app.run(options);
+      await app.run(options);
+
+      // Assert
+      assert.isTrue(consoleInfoStub.withArgs('Exiting.').notCalled);
+    });
+
+    it('should print an exit message and exit if the user denies deleting files', async () => {
+      // Arrange
+      askUserForDeleteStub.withArgs(filesToDeleteTestResponse).resolves(false);
+
+      // Act
+      await app.run(options);
+
+      // Assert
+      assert.isTrue(consoleInfoStub.calledWith('Exiting.'));
+      assert.isTrue(consoleInfoStub.calledOnce);
+      assert.isTrue(fileDeleteFilesStub.notCalled);
+      assert.isTrue(startTranscodeStub.notCalled);
+    });
+
+    it('should delete files returned by getFilesToDelete', async () => {
+      // Act
+      await app.run(options);
 
       // Assert
       assert.isTrue(fileDeleteFilesStub.calledOnce);
       assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse));
     });
 
-    it('should start the transcoding', () => {
+    it('should start the transcoding', async () => {
       // Act
-      app.run(options);
+      await app.run(options);
 
       // Assert
       assert.isTrue(startTranscodeStub.calledOnce);
     });
 
-    it('should delete the files before transcoding', () => {
+    it('should delete the files before transcoding', async () => {
       // Act
-      app.run(options);
+      await app.run(options);
 
       // Assert
       assert.isTrue(fileDeleteFilesStub.calledBefore(startTranscodeStub));
@@ -146,7 +181,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -169,7 +204,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -192,7 +227,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns([]);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -215,7 +250,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg']);
       audioIsLosslessStub.withArgs('matchingFile.ogg').returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -238,7 +273,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg', 'matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -261,7 +296,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg', 'matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory);
+      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -273,8 +308,8 @@ describe('app', () => {
 
   describe('startTranscode', () => {
     beforeEach(() => {
-      processStdoutStub = sinon.stub(process.stdout, 'write');
-      countNumberOfLosslessFilesStub = sinon.stub(app, 'countNumberOfLosslessFiles');
+      processStdoutStub = sandbox.stub(process.stdout, 'write');
+      countNumberOfLosslessFilesStub = sandbox.stub(app, 'countNumberOfLosslessFiles');
       countNumberOfLosslessFilesStub.withArgs('inputDir').returns(2);
 
       options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis());
@@ -296,7 +331,7 @@ describe('app', () => {
       audioIsLosslessStub.withArgs(testData[1]).returns(true);
       audioIsLosslessStub.withArgs(testData[2]).returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir');
+      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir', sandbox);
     });
 
     it('should print current file number and the total number of files', () => {
@@ -363,7 +398,7 @@ describe('app', () => {
       audioIsLosslessStub.withArgs(testData[1]).returns(true);
       audioIsLosslessStub.withArgs(testData[2]).returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir');
+      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir', sandbox);
     });
 
     it('should return the correct number of lossless files', () => {
@@ -375,71 +410,99 @@ describe('app', () => {
     });
   });
 
+  describe('askUserForDelete', () => {
+    let testFiles: string[];
+
+    beforeEach(() => {
+      testFiles = [
+        'testFile1',
+        'testFile2'
+      ];
+
+      inquirerPromptStub.resolves({
+        confirmDelete: null
+      });
+    });
+
+    it('should print the files to the console', async () => {
+      // Act
+      await app.askUserForDelete(testFiles);
+
+      // Assert
+      assert.isTrue(consoleInfoStub.withArgs(testFiles[0]).calledOnce);
+      assert.isTrue(consoleInfoStub.withArgs(testFiles[1]).calledOnce);
+      assert.isTrue(consoleInfoStub.withArgs(testFiles[0])
+        .calledBefore(consoleInfoStub.withArgs(testFiles[1])));
+    });
+
+    it('should ask the user for confirmation', async () => {
+      // Arrange
+      const expectedQuestion: Question = {
+        type: 'confirm',
+        name: 'confirmDelete',
+        message: 'The files listed above will be deleted. Are you sure you want to continue?'
+      };
+
+      // Act
+      await app.askUserForDelete(testFiles);
+
+      // Assert
+      assert.isTrue(inquirerPromptStub.withArgs(expectedQuestion).calledOnce);
+      assert.isTrue(consoleInfoStub.calledBefore(inquirerPromptStub));
+    });
+
+    it('should return true with no question if there are no files to delete', async () => {
+      // Arrange
+      const result: boolean = await app.askUserForDelete([]);
+
+      // Assert
+      assert.isFalse(inquirerPromptStub.called);
+      assert.isTrue(result);
+    });
+
+    it('should return true if the user confirms', async () => {
+      // Arrange
+      const response: inquirer.Answers = {};
+      /* tslint:disable:no-string-literal */
+      response['confirmDelete'] = true;
+      /* tslint:enable:no-string-literal */
+      inquirerPromptStub.resolves(response);
+
+      // Act
+      const result: boolean = await app.askUserForDelete(testFiles);
+
+      // Assert
+      assert.isTrue(result);
+    });
+
+    it('should return false if the user rejects', async () => {
+      // Arrange
+      const response: inquirer.Answers = {};
+      /* tslint:disable:no-string-literal */
+      response['confirmDelete'] = false;
+      /* tslint:enable:no-string-literal */
+      inquirerPromptStub.resolves(response);
+
+      // Act
+      const result: boolean = await app.askUserForDelete(testFiles);
+
+      // Assert
+      assert.isFalse(result);
+    });
+  });
+
   afterEach(() => {
-    if (directoryIteratorStub != null) {
-      directoryIteratorStub.restore();
-    }
-    if (audioTranscodeStub != null) {
-      audioTranscodeStub.restore();
-    }
-    if (audioIsLosslessStub != null) {
-      audioIsLosslessStub.restore();
-    }
-    if (pathJoinStub != null) {
-      pathJoinStub.restore();
-    }
-    if (fileGetRelativePathStub != null) {
-      fileGetRelativePathStub.restore();
-    }
-    if (fileCreateDirectoryStub != null) {
-      fileCreateDirectoryStub.restore();
-    }
-    if (commandLineInputParserValidateStub != null) {
-      commandLineInputParserValidateStub.restore();
-    }
-    if (consoleInfoStub != null) {
-      consoleInfoStub.restore();
-    }
-    if (getFilesToDeleteStub != null) {
-      getFilesToDeleteStub.restore();
-    }
-    if (fileDeleteFilesStub != null) {
-      fileDeleteFilesStub.restore();
-    }
-    if (startTranscodeStub != null) {
-      startTranscodeStub.restore();
-    }
-    if (processStdoutStub != null) {
-      processStdoutStub.restore();
-    }
-    if (fileGetFilesByFileNameStub != null) {
-      fileGetFilesByFileNameStub.restore();
-    }
-    if (fileGetFileNameStub != null) {
-      fileGetFileNameStub.restore();
-    }
-    if (audioGetCodecStub != null) {
-      audioGetCodecStub.restore();
-    }
-    if (audioIsSameCodecStub != null) {
-      audioIsSameCodecStub.restore();
-    }
-    if (fsExistsSyncStub != null) {
-      fsExistsSyncStub.restore();
-    }
-    if (countNumberOfLosslessFilesStub != null) {
-      countNumberOfLosslessFilesStub.restore();
-    }
+    sandbox.restore();
   });
 });
 
-function createDirectoryIteratorStub(callbackParameters: string[], withArgs: string): sinon.SinonStub {
+function createDirectoryIteratorStub(callbackParameters: string[], withArgs: string, sandbox: SinonSandbox): SinonStub {
   function stubFunction(input: string, callback: (filePath: string) => void): void {
     for (const callbackParameter of callbackParameters) {
       callback(callbackParameter);
     }
   }
-  const directoryIteratorStub: sinon.SinonStub = sinon.stub(directoryIterator, 'run');
+  const directoryIteratorStub: SinonStub = sandbox.stub(directoryIterator, 'run');
   directoryIteratorStub.withArgs(withArgs, sinon.match.any).callsFake(stubFunction);
 
   return directoryIteratorStub;

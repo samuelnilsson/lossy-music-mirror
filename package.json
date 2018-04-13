@@ -21,6 +21,7 @@
     "commander": "^2.11.0",
     "cross-spawn": "^6.0.0",
     "fs-extra": "^5.0.0",
+    "inquirer": "^5.2.0",
     "path-extra": "^4.2.1"
   },
   "devDependencies": {
@@ -29,6 +30,7 @@
     "@types/commander": "^2.9.2",
     "@types/cross-spawn": "^6.0.0",
     "@types/fs-extra": "^5.0.0",
+    "@types/inquirer": "0.0.40",
     "@types/mocha": "^2.2.43",
     "@types/node": "^9.3.0",
     "@types/sinon": "^4.1.3",
