@@ -196,10 +196,9 @@ describe('commandLineInputParser', () => {
       assert.isTrue(addArgumentStub.withArgs(
         [ '--delete' ],
         {
-          type: 'boolean',
-          nargs: 0,
           help: 'Delete files in output that does not have a corresponding lossless file in input',
           dest: 'deleteFiles',
+          action: 'storeTrue',
           defaultValue: false
         }
       ).calledOnce);
