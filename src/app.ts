@@ -19,15 +19,18 @@ async function run(options: CommandLineOptions): Promise<void> {
   if (!commandLineInputParser.validate(options)) {
     console.info('Validation failed.');
   } else {
-    const filesToDelete: string[] = self.getFilesToDelete(options.input, options.output, options.codec);
+    if (options.deleteFiles) {
+      const filesToDelete: string[] = self.getFilesToDelete(options.input, options.output, options.codec);
+      const answer: boolean = await self.askUserForDelete(filesToDelete);
+      if (answer) {
+        file.deleteFiles(filesToDelete);
+      } else {
+        console.info('Exiting.');
 
-    const shouldDelete: boolean = await self.askUserForDelete(filesToDelete);
-    if (shouldDelete) {
-      file.deleteFiles(filesToDelete);
-      self.startTranscode(options);
-    } else {
-      console.info('Exiting.');
+        return;
+      }
     }
+    self.startTranscode(options);
   }
 }
 

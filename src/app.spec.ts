@@ -105,6 +105,16 @@ describe('app', () => {
       assert.isTrue(startTranscodeStub.notCalled);
     });
 
+    it('should not ask for delete or delete any files if the delete flag is set to false', async () => {
+      // Act
+      await app.run(options);
+
+      // Assert
+      assert.isTrue(getFilesToDeleteStub.notCalled);
+      assert.isTrue(askUserForDeleteStub.notCalled);
+      assert.isTrue(fileDeleteFilesStub.notCalled);
+    });
+
     it('should ask the user before deleting files', async () => {
       // Arrange
       askUserForDeleteStub.withArgs(filesToDeleteTestResponse).resolves(true);
@@ -118,6 +128,7 @@ describe('app', () => {
 
     it('should print an exit message and exit if the user denies deleting files', async () => {
       // Arrange
+      options.deleteFiles = true;
       askUserForDeleteStub.withArgs(filesToDeleteTestResponse).resolves(false);
 
       // Act
@@ -132,6 +143,7 @@ describe('app', () => {
 
     it('should delete files returned by getFilesToDelete', async () => {
       // Act
+      options.deleteFiles = true;
       await app.run(options);
 
       // Assert
@@ -149,6 +161,7 @@ describe('app', () => {
 
     it('should delete the files before transcoding', async () => {
       // Act
+      options.deleteFiles = true;
       await app.run(options);
 
       // Assert
