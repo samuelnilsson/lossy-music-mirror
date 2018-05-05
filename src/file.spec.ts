@@ -230,8 +230,16 @@ describe('file', () => {
   });
 
   describe('deleteFiles', () => {
+    beforeEach(() => {
+      fileGetDirectoryStub = sinon.stub(file, 'getDirectory');
+      fileGetDirectoryStub.withArgs('/any/file').returns('/any');
+      fileGetDirectoryStub.withArgs('/any/dir').returns('/any');
+    });
+
     it('should delete the specified files and directories', () => {
       // Arrange
+      fsExistsStub.withArgs('/any/file').returns(true);
+      fsExistsStub.withArgs('/any/dir').returns(true);
       const testFiles: string[] = [
         '/any/file',
         '/any/dir'
@@ -243,6 +251,67 @@ describe('file', () => {
       // Assert
       assert.isTrue(fsRemoveSyncStub.withArgs(testFiles[0]).calledOnce);
       assert.isTrue(fsRemoveSyncStub.withArgs(testFiles[1]).calledOnce);
+      assert.equal(fsRemoveSyncStub.callCount, 2);
+    });
+
+    it('should not attempt to delete the specified files and directories they do not exist', () => {
+      // Arrange
+      const testFiles: string[] = [
+        '/any/file',
+        '/any/dir'
+      ];
+      fsExistsStub.withArgs(testFiles[0]).returns(false);
+      fsExistsStub.withArgs(testFiles[1]).returns(false);
+
+      // Act
+      file.deleteFiles(testFiles);
+
+      // Assert
+      assert.isTrue(fsRemoveSyncStub.notCalled);
+    });
+
+    it('should remove the directory of the specified files and directories if it becomes empty and deleteEmptyDirectories is true', () => {
+      // Arrange
+      const testFiles: string[] = [
+        '/any/file',
+        '/any/dir'
+      ];
+      const testDir: string = '/any';
+      fsExistsStub.withArgs(testFiles[0]).returns(true);
+      fsExistsStub.withArgs(testFiles[1]).returns(true);
+      fsExistsStub.withArgs(testDir).returns(true);
+      fileGetDirectoryStub.withArgs(testFiles[0]).returns(testDir);
+      fileGetDirectoryStub.withArgs(testFiles[1]).returns(testDir);
+      fsReadDirStub.withArgs(testDir).onCall(0).returns([testFiles[1]]);
+      fsReadDirStub.withArgs(testDir).onCall(1).returns([]);
+
+      // Act
+      file.deleteFiles(testFiles, true);
+
+      // Assert
+      assert.isTrue(fsRemoveSyncStub.withArgs(testDir).calledOnce);
+    });
+
+    it('should not remove empty directories if they become empty and deleteEmptyDirectories is false', () => {
+      // Arrange
+      const testFiles: string[] = [
+        '/any/file',
+        '/any/dir'
+      ];
+      const testDir: string = '/any';
+      fsExistsStub.withArgs(testFiles[0]).returns(true);
+      fsExistsStub.withArgs(testFiles[1]).returns(true);
+      fsExistsStub.withArgs(testDir).returns(true);
+      fileGetDirectoryStub.withArgs(testFiles[0]).returns(testDir);
+      fileGetDirectoryStub.withArgs(testFiles[1]).returns(testDir);
+      fsReadDirStub.withArgs(testDir).onCall(0).returns([testFiles[1]]);
+      fsReadDirStub.withArgs(testDir).onCall(1).returns([]);
+
+      // Act
+      file.deleteFiles(testFiles, false);
+
+      // Assert
+      assert.isFalse(fsRemoveSyncStub.withArgs(testDir).called);
     });
   });
 

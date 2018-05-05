@@ -96,11 +96,22 @@ function getFilename(filePath: string): string {
 
 /**
  * Deletes the files and directories in filePaths.
- * @param   The paths to the files and/or directories.
+ * @param filePaths              The paths to the files and/or directories.
+ * @param deleteEmptyDirectories Remove the directory of the file or directory
+ *                               if it becomes empty after deletion.
  */
-function deleteFiles(filePaths: string[]): void {
+function deleteFiles(filePaths: string[], deleteEmptyDirectories: boolean = false): void {
   filePaths.forEach((f: string) => {
-    fs.removeSync(f);
+    if (fs.existsSync(f)) {
+      fs.removeSync(f);
+      if (deleteEmptyDirectories) {
+        const directory: string = self.getDirectory(f);
+        const directoryIsEmpty: boolean = fs.readdirSync(directory).length === 0;
+        if (directoryIsEmpty) {
+          self.deleteFiles([directory]);
+        }
+      }
+    }
   });
 }
 
