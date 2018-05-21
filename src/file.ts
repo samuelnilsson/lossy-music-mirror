@@ -50,6 +50,10 @@ function getDirectory(filePath: string): string {
  * @returns The paths to the files and directories in the directory.
  */
 function getFiles(directoryPath: string): string[] {
+  if (!fs.existsSync(directoryPath)) {
+    return [];
+  }
+
   const filenamesInPath: string[] = fs.readdirSync(directoryPath);
 
   return filenamesInPath.map<string>((filename: string) => {

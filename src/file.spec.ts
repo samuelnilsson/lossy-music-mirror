@@ -125,6 +125,7 @@ describe('file', () => {
       const directoryPath: string = '/any/test';
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
       fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
+      fsExistsStub.withArgs(directoryPath).returns(true);
       pathStub = sinon.stub(path, 'join');
       pathStub.withArgs(directoryPath, 'test.any').returns(`${directoryPath}/${resultFileNames[0]}`);
       pathStub.withArgs(directoryPath, 'test2.any').returns(`${directoryPath}/${resultFileNames[1]}`);
@@ -139,6 +140,24 @@ describe('file', () => {
         `${directoryPath}/${resultFileNames[1]}`,
         `${directoryPath}/${resultFileNames[2]}`
       ]);
+    });
+
+    it('should return empty if the directory is empty', () => {
+      // Arrange
+      const directoryPath: string = '/any/test';
+      const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
+      fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
+      fsExistsStub.withArgs(directoryPath).returns(false);
+      pathStub = sinon.stub(path, 'join');
+      pathStub.withArgs(directoryPath, 'test.any').returns(`${directoryPath}/${resultFileNames[0]}`);
+      pathStub.withArgs(directoryPath, 'test2.any').returns(`${directoryPath}/${resultFileNames[1]}`);
+      pathStub.withArgs(directoryPath, 'test3.any').returns(`${directoryPath}/${resultFileNames[2]}`);
+
+      // Act
+      const result: string[] = file.getFiles(directoryPath);
+
+      // Assert
+      assert.deepEqual(result, []);
     });
   });
 
