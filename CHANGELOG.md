@@ -14,4 +14,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Initial release
 
-[Unreleased]: https://github.com/samuelnilsson/lossy-music-mirror/compare/v0.1.0...develop
+[Unreleased]: https://github.com/samuelnilsson/lossy-music-mirror/compare/0.1.0...develop
