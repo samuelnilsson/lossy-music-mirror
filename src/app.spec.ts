@@ -141,14 +141,14 @@ describe('app', () => {
       assert.isTrue(startTranscodeStub.notCalled);
     });
 
-    it('should delete files returned by getFilesToDelete', async () => {
+    it('should delete files returned by getFilesToDelete and empty directories', async () => {
       // Act
       options.deleteFiles = true;
       await app.run(options);
 
       // Assert
       assert.isTrue(fileDeleteFilesStub.calledOnce);
-      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse));
+      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse, true));
     });
 
     it('should start the transcoding', async () => {

@@ -349,6 +349,24 @@ describe('audio', () => {
       assert.isTrue(result instanceof Vorbis);
     });
 
+    it('should return an instance of Opus if the codec is opus', () => {
+      // Arrange
+      const testOpusPath: string = '/any/file.opus';
+      defaultOptions.push(testOpusPath);
+      spawnStub
+        .withArgs('ffprobe', defaultOptions, { stdio: 'pipe' })
+        .returns({
+          status: 0,
+          stdout: Buffer.from('opus\n')
+        });
+
+      // Act
+      const result: ICodec = audio.getCodec(testOpusPath);
+
+      // Assert
+      assert.isTrue(result instanceof Opus);
+    });
+
     it('should return an instance of Flac if the codec is flac', () => {
       // Arrange
       const testFlacPath: string = '/any/file.flac';
