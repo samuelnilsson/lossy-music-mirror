@@ -10,8 +10,10 @@ import { Ape } from './models/Ape';
 import { AppleLossless } from './models/AppleLossless';
 import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { EncoderMode } from './models/EncoderMode';
 import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
 import { TrueAudio } from './models/TrueAudio';
 import { Vorbis } from './models/Vorbis';
 import { WavPack } from './models/WavPack';
@@ -36,7 +38,7 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
       '-loglevel', 'error',
       '-i', filePath,
       '-c:a', options.codec.encoderLib,
-      '-q:a', options.quality.toString(),
+      getEncoderModeOption(options.codec.encoderMode), options.quality.toString(),
       '-vn',
       outputPath
     ];
@@ -86,6 +88,9 @@ function getCodec(filePath: string): ICodec {
       case (new Vorbis().ffmpegName): {
         return new Vorbis();
       }
+      case (new Opus().ffmpegName): {
+        return new Opus();
+      }
       case (new Flac().ffmpegName): {
         return new Flac();
       }
@@ -118,6 +123,21 @@ function getCodec(filePath: string): ICodec {
  */
 function isSameCodec(codecA: ICodec, codecB: ICodec): boolean {
   return codecA.constructor === codecB.constructor;
+}
+
+/**
+ * Returns the correct ffmpeg option string depending on the encoder mode
+ * specified by encoderMode.
+ * @param   The encoder mode.
+ * @returns The ffmpeg option string for the encoder mode.
+ */
+function getEncoderModeOption(encoderMode: EncoderMode): string {
+  switch (encoderMode) {
+    case EncoderMode.Quality:
+      return '-q:a';
+    default:
+      return '-b:a';
+  }
 }
 
 export {

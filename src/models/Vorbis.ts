@@ -2,6 +2,7 @@
  * The Vorbis class.
  */
 
+import { EncoderMode } from './EncoderMode';
 import { LossyCodec } from './LossyCodec';
 
 /**
@@ -14,4 +15,5 @@ export class Vorbis extends LossyCodec {
   public readonly encoderLib: string = 'libvorbis';
   public readonly defaultQuality: number = 3;
   public readonly ffmpegName: string = 'vorbis';
+  public readonly encoderMode: EncoderMode = EncoderMode.Quality;
 }

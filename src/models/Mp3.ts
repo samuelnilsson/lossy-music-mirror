@@ -2,6 +2,7 @@
  * The Mp3 class.
  */
 
+import { EncoderMode } from './EncoderMode';
 import { LossyCodec } from './LossyCodec';
 
 /**
@@ -14,4 +15,5 @@ export class Mp3 extends LossyCodec {
   public readonly encoderLib: string = 'libmp3lame';
   public readonly defaultQuality: number = 4;
   public readonly ffmpegName: string = 'mp3';
+  public readonly encoderMode: EncoderMode = EncoderMode.Quality;
 }

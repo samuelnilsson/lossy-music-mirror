@@ -9,6 +9,7 @@ import * as commandLineInputParser from './commandLineInputParser';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
 import { Vorbis } from './models/Vorbis';
 
 describe('commandLineInputParser', () => {
@@ -102,6 +103,17 @@ describe('commandLineInputParser', () => {
       assert.equal(result.quality, 4);
     });
 
+    it('should set the quality to 64000 on CommandLineOptions by default if codec is opus', () => {
+      // Arrange
+      validParseArgs.codec = 'opus';
+
+      // Act
+      const result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.equal(result.quality, 64000);
+    });
+
     it('should initialize the quality argument', () => {
       // Act
       const result: CommandLineOptions = commandLineInputParser.parse();
@@ -111,7 +123,8 @@ describe('commandLineInputParser', () => {
         [ '-q', '--quality' ],
         {
           type: 'int',
-          help: 'The output quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
+          help: 'The output quality (0-10 [default = 3] for vorbis, 0-9 [default = 4] (lower value is higher quality) for mp3 or ' +
+            '500-256000 [default = 64000] for opus'
         }
       ).calledOnce);
     });
@@ -147,6 +160,7 @@ describe('commandLineInputParser', () => {
       // Arrange
       const vorbis: string = 'vorbis';
       const mp3: string = 'mp3';
+      const opus: string = 'opus';
 
       // Act
       validParseArgs.codec = vorbis;
@@ -155,9 +169,13 @@ describe('commandLineInputParser', () => {
       validParseArgs.codec = mp3;
       const mp3Result: CommandLineOptions = commandLineInputParser.parse();
 
+      validParseArgs.codec = opus;
+      const opusResult: CommandLineOptions = commandLineInputParser.parse();
+
       // Assert
       assert.isTrue(vorbisResult.codec instanceof Vorbis);
       assert.isTrue(mp3Result.codec instanceof Mp3);
+      assert.isTrue(opusResult.codec instanceof Opus);
     });
 
     it('should initialize the codec argument', () => {
@@ -171,7 +189,7 @@ describe('commandLineInputParser', () => {
           type: 'string',
           help: 'The output codec [default = vorbis]',
           defaultValue: 'vorbis',
-          choices: ['vorbis', 'mp3']
+          choices: ['vorbis', 'mp3', 'opus']
         }
       ).calledOnce);
     });
@@ -271,6 +289,25 @@ describe('commandLineInputParser', () => {
       assert.isTrue(tenResult);
     });
 
+    it('should return true if quality is an int between 500-256000 and codec is opus', () => {
+      // Arrange
+      validOptions.codec = new Opus();
+      validOptions.quality = 500;
+
+      // Act
+      const lowResult: boolean = commandLineInputParser.validate(validOptions);
+
+      // Arrange
+      validOptions.quality = 256000;
+
+      // Act
+      const highResult: boolean = commandLineInputParser.validate(validOptions);
+
+      // Assert
+      assert.isTrue(lowResult);
+      assert.isTrue(highResult);
+    });
+
     it('should return false if quality is a negative number', () => {
       // Arrange
       validOptions.quality = -1;
@@ -350,6 +387,64 @@ describe('commandLineInputParser', () => {
       const isCalled: boolean = consoleInfoStub.withArgs(
         `lossy-music-mirror: error: argument "-q/--quality": The value ` +
           `must be between 0 and 9`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
+    it('should return false if quality is larger than 256000 and codec is opus', () => {
+      // Arrange
+      validOptions.codec = new Opus();
+      validOptions.quality = 256001;
+
+      // Act
+      const result: boolean = commandLineInputParser.validate(validOptions);
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should print an error message if quality is larger than 256000 and codec is opus', () => {
+      // Arrange
+      validOptions.codec = new Opus();
+      validOptions.quality = 256001;
+
+      // Act
+      commandLineInputParser.validate(validOptions);
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 500 and 256000`).called;
+      assert.isTrue(isCalledOnce);
+      assert.isTrue(isCalled);
+    });
+
+    it('should return false if quality is lower than 500 and codec is opus', () => {
+      // Arrange
+      validOptions.codec = new Opus();
+      validOptions.quality = 499;
+
+      // Act
+      const result: boolean = commandLineInputParser.validate(validOptions);
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should print an error message if quality is lower than 500 and codec is opus', () => {
+      // Arrange
+      validOptions.codec = new Opus();
+      validOptions.quality = 499;
+
+      // Act
+      commandLineInputParser.validate(validOptions);
+
+      // Assert
+      const isCalledOnce: boolean = consoleInfoStub.calledOnce;
+      const isCalled: boolean = consoleInfoStub.withArgs(
+        `lossy-music-mirror: error: argument "-q/--quality": The value ` +
+          `must be between 500 and 256000`).called;
       assert.isTrue(isCalledOnce);
       assert.isTrue(isCalled);
     });

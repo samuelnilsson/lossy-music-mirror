@@ -7,6 +7,7 @@ import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
 import { LossyCodec } from './models/LossyCodec';
 import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
 import { Vorbis } from './models/Vorbis';
 
 /**
@@ -68,7 +69,8 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-q', '--quality' ],
     {
       type: 'int',
-      help: 'The output quality (0-10 [default = 3] for vorbis or 0-9 [default = 4] (lower value is higher quality) for mp3)'
+      help: 'The output quality (0-10 [default = 3] for vorbis, 0-9 [default = 4] (lower value is higher quality) for mp3 or ' +
+        '500-256000 [default = 64000] for opus'
     }
   );
   parser.addArgument(
@@ -85,7 +87,7 @@ function initializeOptions(parser: ArgumentParser): void {
       type: 'string',
       help: 'The output codec [default = vorbis]',
       defaultValue: 'vorbis',
-      choices: ['vorbis', 'mp3']
+      choices: ['vorbis', 'mp3', 'opus']
     }
   );
   parser.addArgument(
@@ -149,6 +151,9 @@ function mapCodec(codec: string): LossyCodec {
   switch (codec) {
     case 'mp3': {
       return new Mp3();
+    }
+    case 'opus': {
+      return new Opus();
     }
     default: {
       return new Vorbis();

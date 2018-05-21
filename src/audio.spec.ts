@@ -13,8 +13,10 @@ import { Ape } from './models/Ape';
 import { AppleLossless } from './models/AppleLossless';
 import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { EncoderMode } from './models/EncoderMode';
 import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
 import { TrueAudio } from './models/TrueAudio';
 import { Vorbis } from './models/Vorbis';
 import { WavPack } from './models/WavPack';
@@ -115,6 +117,37 @@ describe('audio', () => {
         '-q:a', '5',
         '-vn',
         '/test/test.mp3'
+      ];
+      sinon.assert.calledOnce(spawnStub);
+      sinon.assert.calledWith(spawnStub, 'ffmpeg', expectedOptions);
+    });
+
+    it('should transcode the file into opus if that option is set', () => {
+      // Arrange
+      const testFile: string = '/any/test.flac';
+      const outputDirectory: string = '/test/';
+      pathParseStub.withArgs(testFile).returns({
+        name: 'test'
+      });
+      pathJoinStub.withArgs(outputDirectory, 'test.opus')
+        .returns(`${outputDirectory}test.opus`);
+      fsExistsStub.withArgs(`${outputDirectory}test.opus`)
+        .returns(false);
+      validOptions.codec = new Opus();
+      validOptions.quality = 64000;
+
+      // Act
+      audio.transcode(testFile, outputDirectory, validOptions);
+
+      // Assert
+      const expectedOptions: string[] = [
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-i', '/any/test.flac',
+        '-c:a', 'libopus',
+        '-b:a', '64000',
+        '-vn',
+        '/test/test.opus'
       ];
       sinon.assert.calledOnce(spawnStub);
       sinon.assert.calledWith(spawnStub, 'ffmpeg', expectedOptions);
@@ -238,6 +271,18 @@ describe('audio', () => {
 
       // Act
       const result: boolean = audio.isLossless(testVorbisPath);
+
+      // Assert
+      assert.isFalse(result);
+    });
+
+    it('should return false if the codec is opus', () => {
+      // Arrange
+      const testOpusPath: string = '/any/file.opus';
+      getCodecStub.withArgs(testOpusPath).returns(new Opus());
+
+      // Act
+      const result: boolean = audio.isLossless(testOpusPath);
 
       // Assert
       assert.isFalse(result);
