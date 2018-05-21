@@ -20,7 +20,7 @@
     "argparse": "^1.0.9",
     "commander": "^2.11.0",
     "cross-spawn": "^6.0.0",
-    "fs-extra": "^5.0.0",
+    "fs-extra": "^6.0.0",
     "inquirer": "^5.2.0",
     "path-extra": "^4.2.1"
   },
