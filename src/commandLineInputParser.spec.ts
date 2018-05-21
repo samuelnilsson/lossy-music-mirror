@@ -175,6 +175,34 @@ describe('commandLineInputParser', () => {
         }
       ).calledOnce);
     });
+
+    it('should set the deleteFiles property on CommandLineOptions', () => {
+      // Act
+      validParseArgs.deleteFiles = true;
+      const trueResult: CommandLineOptions = commandLineInputParser.parse();
+      validParseArgs.deleteFiles = false;
+      const falseResult: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.isTrue(trueResult.deleteFiles);
+      assert.isFalse(falseResult.deleteFiles);
+    });
+
+    it('should initialize the delete argument', () => {
+      // Act
+      const result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.isTrue(addArgumentStub.withArgs(
+        [ '--delete' ],
+        {
+          help: 'Delete files in output that does not have a corresponding lossless file in input',
+          dest: 'deleteFiles',
+          action: 'storeTrue',
+          defaultValue: false
+        }
+      ).calledOnce);
+    });
   });
 
   describe('validate', () => {
@@ -183,7 +211,7 @@ describe('commandLineInputParser', () => {
     let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis());
+      validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis(), false);
       consoleInfoStub = sinon.stub(console, 'info');
       fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
         .returns(true);

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - An output codec option
 - Possibility to set output codec to mp3
+- A delete option which deletes files in the output directory that does not have a corresponding file in the input directory
 
 ## 0.1.0
 ### Added

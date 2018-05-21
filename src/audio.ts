@@ -110,8 +110,19 @@ function getCodec(filePath: string): ICodec {
   }
 }
 
+/**
+ * Determines if the codec of codecA and codecB are the same.
+ * @param   codecA - The first codec.
+ * @param   codecB - The second codec.
+ * @returns          True if the codecs are the same and false otherwise.
+ */
+function isSameCodec(codecA: ICodec, codecB: ICodec): boolean {
+  return codecA.constructor === codecB.constructor;
+}
+
 export {
   transcode,
   isLossless,
-  getCodec
+  getCodec,
+  isSameCodec
 };
