@@ -25,7 +25,9 @@ lossy-music-mirror /home/output
 All the available options are:
 
 ```
-usage: lossy-music-mirror [-h] [-v] [-q QUALITY] [-i INPUT] output
+usage: lossy-music-mirror [-h] [-v] [-q QUALITY] [-i INPUT] [-c {vorbis,mp3}]
+                          [--delete]
+                          output
 
 Positional arguments:
   output                The output directory path
@@ -34,9 +36,15 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -v, --version         Show program's version number and exit.
   -q QUALITY, --quality QUALITY
-                        The vorbis quality (0-10 [default = 3])
+                        The output quality (0-10 [default = 3] for vorbis or 
+                        0-9 [default = 4] (lower value is higher quality) for 
+                        mp3)
   -i INPUT, --input INPUT
                         The input directory path [default = ./]
+  -c {vorbis,mp3}, --codec {vorbis,mp3}
+                        The output codec [default = vorbis]
+  --delete              Delete files in output that does not have a 
+                        corresponding lossless file in input
 ```
 
 ## Development
