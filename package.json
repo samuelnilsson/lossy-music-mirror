@@ -1,6 +1,6 @@
 {
   "name": "lossy-music-mirror",
-  "version": "0.1.1",
+  "version": "0.2.0-alpha.1",
   "description": "Create a lossy mirror of your lossless music library",
   "bin": {
     "lossy-music-mirror": "./build/index.js"
