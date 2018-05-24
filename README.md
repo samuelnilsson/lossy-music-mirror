@@ -16,7 +16,7 @@ npm install -g lossy-music-mirror
 ```
 
 ### Usage
-For minimal usage the output path is required. Then the input directory will be the directory you are currently positioned in. For example, the following command will transcode every lossless file (of codec Flac, Ape, Apple lossless, WMA lossless, WavPack or TrueAudio) in the source directory (and its subdirectories) into vorbis and output the resulting files in ./output keeping the directory and file structure of the source:
+For minimal usage the output path is required. Then the input directory will be the directory you are currently positioned in. For example, the following command will transcode every lossless file (of codec Flac, Ape, Apple lossless, WMA lossless, WavPack or TrueAudio) in the source directory (and its subdirectories) into vorbis and output the resulting files in /home/output keeping the directory and file structure of the source:
 
 ```
 lossy-music-mirror /home/output
@@ -25,8 +25,8 @@ lossy-music-mirror /home/output
 All the available options are:
 
 ```
-usage: lossy-music-mirror [-h] [-v] [-q QUALITY] [-i INPUT] [-c {vorbis,mp3}]
-                          [--delete]
+usage: lossy-music-mirror [-h] [-v] [-q QUALITY] [-i INPUT]
+                          [-c {vorbis,mp3,opus}] [--delete]
                           output
 
 Positional arguments:
@@ -36,12 +36,12 @@ Optional arguments:
   -h, --help            Show this help message and exit.
   -v, --version         Show program's version number and exit.
   -q QUALITY, --quality QUALITY
-                        The output quality (0-10 [default = 3] for vorbis or 
+                        The output quality (0-10 [default = 3] for vorbis, 
                         0-9 [default = 4] (lower value is higher quality) for 
-                        mp3)
+                        mp3 or 500-256000 [default = 64000] for opus
   -i INPUT, --input INPUT
                         The input directory path [default = ./]
-  -c {vorbis,mp3}, --codec {vorbis,mp3}
+  -c {vorbis,mp3,opus}, --codec {vorbis,mp3,opus}
                         The output codec [default = vorbis]
   --delete              Delete files in output that does not have a 
                         corresponding lossless file in input
