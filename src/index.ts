@@ -9,7 +9,7 @@ import * as commandLineInputParser from './commandLineInputParser';
 import { CommandLineOptions } from './models/CommandLineOptions';
 
 const options: CommandLineOptions = commandLineInputParser.parse({
-  version: '0.2.0-alpha.1',
+  version: '0.2.0',
   addHelp: true
 });
 
