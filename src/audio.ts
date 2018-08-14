@@ -6,26 +6,39 @@ import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
-import * as file from './file';
+import { Ape } from './models/Ape';
+import { AppleLossless } from './models/AppleLossless';
+import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { EncoderMode } from './models/EncoderMode';
+import { Flac } from './models/Flac';
+import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
+import { TrueAudio } from './models/TrueAudio';
+import { Vorbis } from './models/Vorbis';
+import { WavPack } from './models/WavPack';
+import { WmaLossless } from './models/WmaLossless';
+
+const self: any = exports;
 
 /**
- * Transcodes the file into ogg vorbis and writes it to outputDirectory.
+ * Transcodes the file according to the options and writes it to outputDirectory.
  * @param file            - The path to the file to transcode.
  * @param outputDirectory - The directory to write the transcoded file to.
  * @param options         - Options from the command line.
  */
 function transcode(filePath: string, outputDirectory: string, options: CommandLineOptions): void {
   const fileName: string = path.parse(filePath).name;
-  const outputPath: string = path.join(outputDirectory, `${fileName}.ogg`);
+  const outputPath: string = path.join(outputDirectory, `${fileName}.${options.codec.extension}`);
+
   if (!fs.existsSync(outputPath)) {
     console.info(`Converting ${filePath} to ${outputPath}`);
     const ffmpegOptions: string[] = [
       '-hide_banner',
       '-loglevel', 'error',
       '-i', filePath,
-      '-c:a', 'libvorbis',
-      '-q:a', options.quality.toString(),
+      '-c:a', options.codec.encoderLib,
+      getEncoderModeOption(options.codec.encoderMode), options.quality.toString(),
       '-vn',
       outputPath
     ];
@@ -37,18 +50,99 @@ function transcode(filePath: string, outputDirectory: string, options: CommandLi
 
 /**
  * Determines if a file is a lossless audio file.
- * @param  The file.
+ * @param   The path to the file.
  * @returns True if the file is a lossless audio file and false otherwise.
  */
 function isLossless(filePath: string): boolean {
-  const LOSSLESS_EXTENSIONS: string[] = ['flac'];
+  const codec: ICodec = self.getCodec(filePath);
 
-  return LOSSLESS_EXTENSIONS.some((extension: string) => {
-    return extension === file.getExtension(filePath);
-  });
+  return codec !== null ? codec.isLossless : null;
+}
+
+/**
+ * Determines the audio codec of a file.
+ * @param   The file.
+ * @returns The audio codec of the file or null if the codec is not supported or the
+ *          file is not an audio file.
+ */
+function getCodec(filePath: string): ICodec {
+  const ffprobeOptions: string[] = [
+    '-v', 'error',
+    '-select_streams', 'a:0',
+    '-show_entries', 'stream=codec_name',
+    '-of', 'default=nokey=1:noprint_wrappers=1',
+    filePath
+  ];
+  const cmdResult: SpawnSyncReturns<Buffer> = spawn.sync('ffprobe', ffprobeOptions, { stdio: 'pipe' });
+
+  const successExitCode: number = 0;
+
+  if (cmdResult.status !== successExitCode) {
+    return null;
+  } else {
+    const cmdOutput: string = String(cmdResult.stdout).trim();
+    switch (cmdOutput) {
+      case (new Mp3().ffmpegName): {
+        return new Mp3();
+      }
+      case (new Vorbis().ffmpegName): {
+        return new Vorbis();
+      }
+      case (new Opus().ffmpegName): {
+        return new Opus();
+      }
+      case (new Flac().ffmpegName): {
+        return new Flac();
+      }
+      case (new Ape().ffmpegName): {
+        return new Ape();
+      }
+      case (new AppleLossless().ffmpegName): {
+        return new AppleLossless();
+      }
+      case (new WmaLossless().ffmpegName): {
+        return new WmaLossless();
+      }
+      case (new WavPack().ffmpegName): {
+        return new WavPack();
+      }
+      case (new TrueAudio().ffmpegName): {
+        return new TrueAudio();
+      }
+      default:
+        return null;
+    }
+  }
+}
+
+/**
+ * Determines if the codec of codecA and codecB are the same.
+ * @param   codecA - The first codec.
+ * @param   codecB - The second codec.
+ * @returns          True if the codecs are the same and false otherwise.
+ */
+function isSameCodec(codecA: ICodec, codecB: ICodec): boolean {
+  return codecA.constructor === codecB.constructor;
+}
+
+/**
+ * Returns the correct ffmpeg option string depending on the encoder mode
+ * specified by encoderMode.
+ * @param   The encoder mode.
+ * @returns The ffmpeg option string for the encoder mode.
+ */
+function getEncoderModeOption(encoderMode: EncoderMode): string {
+  switch (encoderMode) {
+    case EncoderMode.Quality:
+      return '-q:a';
+    default:
+      return '-b:a';
+  }
 }
 
 export {
   transcode,
-  isLossless
+  isLossless,
+  getCodec,
+  isSameCodec
 };

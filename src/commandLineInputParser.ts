@@ -5,6 +5,10 @@
 import { ArgumentParser, ArgumentParserOptions } from 'argparse';
 import * as file from './file';
 import { CommandLineOptions } from './models/CommandLineOptions';
+import { LossyCodec } from './models/LossyCodec';
+import { Mp3 } from './models/Mp3';
+import { Opus } from './models/Opus';
+import { Vorbis } from './models/Vorbis';
 
 /**
  * Validates the command line options. Prints validation error messages to the
@@ -13,7 +17,7 @@ import { CommandLineOptions } from './models/CommandLineOptions';
  * @returns True if the validation succeeded and false otherwise.
  */
 function validate(options: CommandLineOptions): boolean {
-  return validQuality(options.quality)
+  return validQuality(options.quality, options.codec)
     && validInput(options.input);
 }
 
@@ -29,20 +33,24 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
 
   const output: string = parsedArguments.output;
 
+  const input: string = parsedArguments.input;
+
+  const codecString: string = parsedArguments.codec;
+  const codec: LossyCodec = mapCodec(codecString);
+
+  const deleteFiles: boolean = parsedArguments.deleteFiles;
+
   let quality: number = parsedArguments.quality;
   if (quality == null) {
-    quality = 3;
-  }
-
-  let input: string = parsedArguments.input;
-  if (input == null) {
-    input = './';
+    quality = codec.defaultQuality;
   }
 
   return new CommandLineOptions(
     output,
     quality,
-    input
+    input,
+    codec,
+    deleteFiles
   );
 }
 
@@ -61,27 +69,47 @@ function initializeOptions(parser: ArgumentParser): void {
     [ '-q', '--quality' ],
     {
       type: 'int',
-      help: 'The vorbis quality (0-10 [default = 3])'
+      help: 'The output quality (0-10 [default = 3] for vorbis, 0-9 [default = 4] (lower value is higher quality) for mp3 or ' +
+        '500-256000 [default = 64000] for opus'
     }
   );
   parser.addArgument(
     [ '-i', '--input' ],
     {
       type: 'string',
-      help: 'The input directory path [default = ./]'
+      help: 'The input directory path [default = ./]',
+      defaultValue: './'
+    }
+  );
+  parser.addArgument(
+    [ '-c', '--codec' ],
+    {
+      type: 'string',
+      help: 'The output codec [default = vorbis]',
+      defaultValue: 'vorbis',
+      choices: ['vorbis', 'mp3', 'opus']
+    }
+  );
+  parser.addArgument(
+    [ '--delete' ],
+    {
+      help: 'Delete files in output that does not have a corresponding lossless file in input',
+      dest: 'deleteFiles',
+      action: 'storeTrue',
+      defaultValue: false
     }
   );
 }
 
 /**
- * Validates the quality command line input. Prints validation error messages
- * to the console.
+ * Validates the quality command line input for the given output codec. Prints
+ * validation error messages to the console.
  * @returns True if the validation succeeded and false otherwise.
  */
-function validQuality(quality: number): boolean {
-  if (quality < 0 || quality > 10) {
+function validQuality(quality: number, codec: LossyCodec): boolean {
+  if (quality < codec.minQuality || quality > codec.maxQuality) {
     console.info(`lossy-music-mirror: error: argument "-q/--quality": The ` +
-                 `value must be between 0 and 10`);
+                 `value must be between ${codec.minQuality} and ${codec.maxQuality}`);
 
     return false;
   }
@@ -117,6 +145,20 @@ function validInput(input: string): boolean {
  */
 function isDecimal(n: number): boolean {
   return n % 1 !== 0;
+}
+
+function mapCodec(codec: string): LossyCodec {
+  switch (codec) {
+    case 'mp3': {
+      return new Mp3();
+    }
+    case 'opus': {
+      return new Opus();
+    }
+    default: {
+      return new Vorbis();
+    }
+  }
 }
 
 export {
