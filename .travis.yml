@@ -7,16 +7,24 @@ after_script:
 before_deploy:
 - npm run compile
 deploy:
-  provider: npm
-  email: samni698@gmail.com
-  api_key: $NPM_TOKEN
-  skip_cleanup: true
-  on:
-    branch: master
-    tags: true
-    repo: samuelnilsson/lossy-music-mirror
-    node: '9'
-  on:
-    branch: release/*
-    repo: samuelnilsson/lossy-music-mirror
-    node: '9'
+  - provider: npm
+    email: samni698@gmail.com
+    api_key: $NPM_TOKEN
+    skip_cleanup: true
+    on:
+      repo: samuelnilsson/lossy-music-mirror
+      node: '9'
+      tags: true
+      branches:
+        only:
+          - master
+  - provider: npm
+    email: samni698@gmail.com
+    api_key: $NPM_TOKEN
+    skip_cleanup: true
+    on:
+      repo: samuelnilsson/lossy-music-mirror
+      node: '9'
+      branches:
+        only:
+          - release/*
