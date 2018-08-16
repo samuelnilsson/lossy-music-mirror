@@ -3,7 +3,6 @@
  */
 
 import { assert } from 'chai';
-import { SpawnSyncReturns } from 'child_process';
 import * as spawn from 'cross-spawn';
 import * as fs from 'fs-extra';
 import * as path from 'path-extra';
@@ -13,7 +12,6 @@ import { Ape } from './models/Ape';
 import { AppleLossless } from './models/AppleLossless';
 import { ICodec } from './models/Codec.interface';
 import { CommandLineOptions } from './models/CommandLineOptions';
-import { EncoderMode } from './models/EncoderMode';
 import { Flac } from './models/Flac';
 import { Mp3 } from './models/Mp3';
 import { Opus } from './models/Opus';
@@ -23,6 +21,7 @@ import { WavPack } from './models/WavPack';
 import { WmaLossless } from './models/WmaLossless';
 
 describe('audio', () => {
+  let sandbox: sinon.SinonSandbox;
   let pathParseStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
   let spawnStub: sinon.SinonStub;
@@ -33,33 +32,17 @@ describe('audio', () => {
   let validOptions: CommandLineOptions;
 
   beforeEach(() => {
-    pathParseStub = sinon.stub(path, 'parse');
-    pathJoinStub = sinon.stub(path, 'join');
-    spawnStub = sinon.stub(spawn, 'sync');
-    consoleInfoStub = sinon.stub(console, 'info');
+    sandbox = sinon.createSandbox();
+    pathParseStub = sandbox.stub(path, 'parse');
+    pathJoinStub = sandbox.stub(path, 'join');
+    spawnStub = sandbox.stub(spawn, 'sync');
+    consoleInfoStub = sandbox.stub(console, 'info');
     validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis(), false);
-    fsExistsStub = sinon.stub(fs, 'existsSync');
+    fsExistsStub = sandbox.stub(fs, 'existsSync');
   });
 
   afterEach(() => {
-    if (pathParseStub != null) {
-      pathParseStub.restore();
-    }
-    if (pathJoinStub != null) {
-      pathJoinStub.restore();
-    }
-    if (spawnStub != null) {
-      spawnStub.restore();
-    }
-    if (consoleInfoStub != null) {
-      consoleInfoStub.restore();
-    }
-    if (fsExistsStub != null) {
-      fsExistsStub.restore();
-    }
-    if (getCodecStub != null) {
-      getCodecStub.restore();
-    }
+    sandbox.restore();
   });
 
   describe('transcode', () => {
@@ -237,7 +220,7 @@ describe('audio', () => {
 
   describe('isLossless', () => {
     beforeEach(() => {
-      getCodecStub = sinon.stub(audio, 'getCodec');
+      getCodecStub = sandbox.stub(audio, 'getCodec');
     });
 
     it('should return true if the codec is flac', () => {

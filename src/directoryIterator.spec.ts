@@ -9,12 +9,18 @@ import * as file from './file';
 
 describe('directoryIterator', () => {
   describe('run', () => {
+    let sandbox: sinon.SinonSandbox;
     let getFilesStub: sinon.SinonStub;
     let isDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      getFilesStub = sinon.stub(file, 'getFiles');
-      isDirectoryStub = sinon.stub(file, 'isDirectory');
+      sandbox = sinon.createSandbox();
+      getFilesStub = sandbox.stub(file, 'getFiles');
+      isDirectoryStub = sandbox.stub(file, 'isDirectory');
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should execute the callback function for each file in the directory', () => {
@@ -61,15 +67,6 @@ describe('directoryIterator', () => {
       assert.isTrue(onFileCallbackSpy.withArgs('file4').calledOnce);
       assert.isTrue(onFileCallbackSpy.withArgs('file5').calledOnce);
       assert.isTrue(onFileCallbackSpy.withArgs('file6').calledOnce);
-    });
-
-    afterEach(() => {
-      if (getFilesStub != null) {
-        getFilesStub.restore();
-      }
-      if (isDirectoryStub != null) {
-        isDirectoryStub.restore();
-      }
     });
   });
 });

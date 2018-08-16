@@ -18,7 +18,6 @@ import { Vorbis } from './models/Vorbis';
 
 describe('app', () => {
   let sandbox: sinon.SinonSandbox;
-  let directoryIteratorStub: sinon.SinonStub;
   let audioTranscodeStub: sinon.SinonStub;
   let audioIsLosslessStub: sinon.SinonStub;
   let pathJoinStub: sinon.SinonStub;
@@ -58,6 +57,10 @@ describe('app', () => {
     audioIsSameCodecStub = sandbox.stub(audio, 'isSameCodec');
     fsExistsSyncStub = sandbox.stub(fs, 'existsSync');
     inquirerPromptStub = sandbox.stub(inquirer, 'prompt');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('run', () => {
@@ -192,7 +195,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -215,7 +218,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -238,7 +241,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns([]);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -261,7 +264,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg']);
       audioIsLosslessStub.withArgs('matchingFile.ogg').returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -284,7 +287,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg', 'matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -307,7 +310,7 @@ describe('app', () => {
       fileGetFilesByFileNameStub.withArgs('joinedOutput', 'musicFile').returns(['matchingFile.ogg', 'matchingFile.flac']);
       audioIsLosslessStub.withArgs('matchingFile.flac').returns(true);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
+      createDirectoryIteratorStub(testData, testOutputDirectory, sandbox);
 
       // Act
       const result: string[] = app.getFilesToDelete(testInputDirectory, testOutputDirectory, testOutputCodec);
@@ -342,7 +345,7 @@ describe('app', () => {
       audioIsLosslessStub.withArgs(testData[1]).returns(true);
       audioIsLosslessStub.withArgs(testData[2]).returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir', sandbox);
+      createDirectoryIteratorStub(testData, 'inputDir', sandbox);
     });
 
     it('should print current file number and the total number of files', () => {
@@ -409,7 +412,7 @@ describe('app', () => {
       audioIsLosslessStub.withArgs(testData[1]).returns(true);
       audioIsLosslessStub.withArgs(testData[2]).returns(false);
 
-      directoryIteratorStub = createDirectoryIteratorStub(testData, 'inputDir', sandbox);
+      createDirectoryIteratorStub(testData, 'inputDir', sandbox);
     });
 
     it('should return the correct number of lossless files', () => {
@@ -500,10 +503,6 @@ describe('app', () => {
       // Assert
       assert.isFalse(result);
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 });
 

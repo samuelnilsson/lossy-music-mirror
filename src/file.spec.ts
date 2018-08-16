@@ -9,6 +9,7 @@ import * as sinon from 'sinon';
 import * as file from './file';
 
 describe('file', () => {
+  let sandbox: sinon.SinonSandbox;
   let pathStub: sinon.SinonStub;
   let fsExistsStub: sinon.SinonStub;
   let fsEnsureDirStub: sinon.SinonStub;
@@ -21,11 +22,16 @@ describe('file', () => {
   let fileGetFilesStub: sinon.SinonStub;
 
   beforeEach(() => {
-    fsExistsStub = sinon.stub(fs, 'existsSync');
-    fsEnsureDirStub = sinon.stub(fs, 'ensureDirSync');
-    fsLstatStub = sinon.stub(fs, 'lstatSync');
-    fsReadDirStub = sinon.stub(fs, 'readdirSync');
-    fsRemoveSyncStub = sinon.stub(fs, 'removeSync');
+    sandbox = sinon.createSandbox();
+    fsExistsStub = sandbox.stub(fs, 'existsSync');
+    fsEnsureDirStub = sandbox.stub(fs, 'ensureDirSync');
+    fsLstatStub = sandbox.stub(fs, 'lstatSync');
+    fsReadDirStub = sandbox.stub(fs, 'readdirSync');
+    fsRemoveSyncStub = sandbox.stub(fs, 'removeSync');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   describe('getAbsolutePath', () => {
@@ -33,7 +39,7 @@ describe('file', () => {
       // Arrange
       const relativePath: string = './test/test.any';
       const absolutePath: string = '/any/test/test.any';
-      pathStub = sinon.stub(path, 'resolve');
+      pathStub = sandbox.stub(path, 'resolve');
       pathStub.withArgs(relativePath).returns(absolutePath);
 
       // Act
@@ -108,7 +114,7 @@ describe('file', () => {
       // Arrange
       const directoryPath: string = '/any/test';
       const filePath: string = `${directoryPath}/test.any`;
-      pathStub = sinon.stub(path, 'dirname');
+      pathStub = sandbox.stub(path, 'dirname');
       pathStub.withArgs(filePath).returns(directoryPath);
 
       // Act
@@ -126,7 +132,7 @@ describe('file', () => {
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
       fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
       fsExistsStub.withArgs(directoryPath).returns(true);
-      pathStub = sinon.stub(path, 'join');
+      pathStub = sandbox.stub(path, 'join');
       pathStub.withArgs(directoryPath, 'test.any').returns(`${directoryPath}/${resultFileNames[0]}`);
       pathStub.withArgs(directoryPath, 'test2.any').returns(`${directoryPath}/${resultFileNames[1]}`);
       pathStub.withArgs(directoryPath, 'test3.any').returns(`${directoryPath}/${resultFileNames[2]}`);
@@ -148,7 +154,7 @@ describe('file', () => {
       const resultFileNames: string[] = ['test.any', 'test2.any', 'test3.any'];
       fsReadDirStub.withArgs(directoryPath).returns(resultFileNames);
       fsExistsStub.withArgs(directoryPath).returns(false);
-      pathStub = sinon.stub(path, 'join');
+      pathStub = sandbox.stub(path, 'join');
       pathStub.withArgs(directoryPath, 'test.any').returns(`${directoryPath}/${resultFileNames[0]}`);
       pathStub.withArgs(directoryPath, 'test2.any').returns(`${directoryPath}/${resultFileNames[1]}`);
       pathStub.withArgs(directoryPath, 'test3.any').returns(`${directoryPath}/${resultFileNames[2]}`);
@@ -163,17 +169,17 @@ describe('file', () => {
 
   describe('getRelativePath', () => {
     beforeEach(() => {
-      fileIsDirectoryStub = sinon.stub(file, 'isDirectory');
+      fileIsDirectoryStub = sandbox.stub(file, 'isDirectory');
       fileIsDirectoryStub.withArgs('/any').returns(true);
       fileIsDirectoryStub.withArgs('/any2').returns(true);
       fileIsDirectoryStub.withArgs('/any/file.any').returns(false);
       fileIsDirectoryStub.withArgs('/any2/file2.any').returns(false);
 
-      fileGetDirectoryStub = sinon.stub(file, 'getDirectory');
+      fileGetDirectoryStub = sandbox.stub(file, 'getDirectory');
       fileGetDirectoryStub.withArgs('/any/file.any').returns('/any');
       fileGetDirectoryStub.withArgs('/any2/file2.any').returns('/any2');
 
-      pathStub = sinon.stub(path, 'relative');
+      pathStub = sandbox.stub(path, 'relative');
       pathStub.returns(null);
       pathStub.withArgs('/any', '/any2').returns('/any3');
     });
@@ -235,7 +241,7 @@ describe('file', () => {
     it('should return the name of the file or directory', () => {
       // Arrange
       const testPath: string = '/any/name.ext';
-      pathStub = sinon.stub(path, 'parse');
+      pathStub = sandbox.stub(path, 'parse');
       pathStub.withArgs(testPath).returns({
         name: 'name'
       });
@@ -250,7 +256,7 @@ describe('file', () => {
 
   describe('deleteFiles', () => {
     beforeEach(() => {
-      fileGetDirectoryStub = sinon.stub(file, 'getDirectory');
+      fileGetDirectoryStub = sandbox.stub(file, 'getDirectory');
       fileGetDirectoryStub.withArgs('/any/file').returns('/any');
       fileGetDirectoryStub.withArgs('/any/dir').returns('/any');
     });
@@ -345,10 +351,10 @@ describe('file', () => {
         'testname.c'
       ];
 
-      fileGetFilesStub = sinon.stub(file, 'getFiles');
+      fileGetFilesStub = sandbox.stub(file, 'getFiles');
       fileGetFilesStub.withArgs(testDirectory).returns(testDirectoryFiles);
 
-      fileGetFileNameStub = sinon.stub(file, 'getFilename');
+      fileGetFileNameStub = sandbox.stub(file, 'getFilename');
       fileGetFileNameStub.withArgs(testDirectoryFiles[0]).returns(testFilename);
       fileGetFileNameStub.withArgs(testDirectoryFiles[1]).returns('othername');
       fileGetFileNameStub.withArgs(testDirectoryFiles[2]).returns(testFilename);
@@ -362,38 +368,5 @@ describe('file', () => {
         'testname.c'
       ]);
     });
-  });
-
-  afterEach(() => {
-    if (pathStub != null) {
-      pathStub.restore();
-    }
-    if (fsExistsStub != null) {
-      fsExistsStub.restore();
-    }
-    if (fsEnsureDirStub != null) {
-      fsEnsureDirStub.restore();
-    }
-    if (fsLstatStub != null) {
-      fsLstatStub.restore();
-    }
-    if (fsReadDirStub != null) {
-      fsReadDirStub.restore();
-    }
-    if (fileIsDirectoryStub != null) {
-      fileIsDirectoryStub.restore();
-    }
-    if (fileGetDirectoryStub != null) {
-      fileGetDirectoryStub.restore();
-    }
-    if (fsRemoveSyncStub != null) {
-      fsRemoveSyncStub.restore();
-    }
-    if (fileGetFileNameStub != null) {
-      fileGetFileNameStub.restore();
-    }
-    if (fileGetFilesStub != null) {
-      fileGetFilesStub.restore();
-    }
   });
 });

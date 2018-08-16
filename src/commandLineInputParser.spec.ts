@@ -13,16 +13,16 @@ import { Opus } from './models/Opus';
 import { Vorbis } from './models/Vorbis';
 
 describe('commandLineInputParser', () => {
+  let sandbox: sinon.SinonSandbox;
   let parserStub: sinon.SinonStub;
 
   beforeEach(() => {
-    parserStub = sinon.stub(a, 'ArgumentParser');
+    sandbox = sinon.createSandbox();
+    parserStub = sandbox.stub(a, 'ArgumentParser');
   });
 
   afterEach(() => {
-    if (parserStub != null) {
-      parserStub.restore();
-    }
+    sandbox.restore();
   });
 
   describe('parse', () => {
@@ -37,8 +37,8 @@ describe('commandLineInputParser', () => {
         input: null,
         codec: 'vorbis'
       };
-      parseArgsStub = sinon.stub();
-      addArgumentStub = sinon.stub();
+      parseArgsStub = sandbox.stub();
+      addArgumentStub = sandbox.stub();
       parseArgsStub.returns(validParseArgs);
       parserStub.returns({
         parseArgs: parseArgsStub,
@@ -230,8 +230,8 @@ describe('commandLineInputParser', () => {
 
     beforeEach(() => {
       validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis(), false);
-      consoleInfoStub = sinon.stub(console, 'info');
-      fileIsDirectoryStub = sinon.stub(file, 'isDirectory')
+      consoleInfoStub = sandbox.stub(console, 'info');
+      fileIsDirectoryStub = sandbox.stub(file, 'isDirectory')
         .returns(true);
     });
 
