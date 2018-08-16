@@ -69,14 +69,17 @@ function getFiles(directoryPath: string): string[] {
  * @returns       The relative path from filePathA to filePathB.
  */
 function getRelativePath(pathA: string, pathB: string): string {
-  if (!self.isDirectory(pathA)) {
-    pathA = self.getDirectory(pathA);
+  let directoryA: string = pathA;
+  let directoryB: string = pathB;
+
+  if (!self.isDirectory(directoryA)) {
+    directoryA = self.getDirectory(directoryA);
   }
-  if (!self.isDirectory(pathB)) {
-    pathB = self.getDirectory(pathB);
+  if (!self.isDirectory(directoryB)) {
+    directoryB = self.getDirectory(directoryB);
   }
 
-  return path.relative(pathA, pathB);
+  return path.relative(directoryA, directoryB);
 }
 
 /**
