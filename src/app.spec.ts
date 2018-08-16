@@ -43,7 +43,7 @@ describe('app', () => {
   let options: CommandLineOptions;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
     audioTranscodeStub = sandbox.stub(audio, 'transcode');
     audioIsLosslessStub = sandbox.stub(audio, 'isLossless');
     pathJoinStub = sandbox.stub(path, 'join');
