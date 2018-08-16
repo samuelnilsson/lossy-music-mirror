@@ -4,7 +4,6 @@
 
 import * as fs from 'fs-extra';
 import * as inquirer from 'inquirer';
-import { Answers } from 'inquirer';
 import * as path from 'path';
 import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
@@ -105,7 +104,7 @@ async function askUserForDelete(files: string[]): Promise<boolean> {
     message: 'The files listed above will be deleted. Are you sure you want to continue?'
   };
 
-  const answer: Answers = await inquirer.prompt(question);
+  const answer: inquirer.Answers = await inquirer.prompt(question);
 
   /* tslint:disable:no-string-literal */
   return answer['confirmDelete'];

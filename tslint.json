@@ -5,6 +5,7 @@
     "no-console": false,
     "no-any": false,
     "no-unsafe-any": false,
-    "no-multiline-string": false
+    "no-multiline-string": false,
+    "export-name": false
   }
 }

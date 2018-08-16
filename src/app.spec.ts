@@ -5,10 +5,8 @@
 import { assert } from 'chai';
 import * as fs from 'fs-extra';
 import * as inquirer from 'inquirer';
-import { Question } from 'inquirer';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { SinonSandbox, SinonStub } from 'sinon';
 import * as app from './app';
 import * as audio from './audio';
 import * as commandLineInputParser from './commandLineInputParser';
@@ -19,27 +17,27 @@ import { Mp3 } from './models/Mp3';
 import { Vorbis } from './models/Vorbis';
 
 describe('app', () => {
-  let sandbox: SinonSandbox;
-  let directoryIteratorStub: SinonStub;
-  let audioTranscodeStub: SinonStub;
-  let audioIsLosslessStub: SinonStub;
-  let pathJoinStub: SinonStub;
-  let fileGetRelativePathStub: SinonStub;
-  let fileCreateDirectoryStub: SinonStub;
-  let commandLineInputParserValidateStub: SinonStub;
-  let consoleInfoStub: SinonStub;
-  let getFilesToDeleteStub: SinonStub;
-  let fileDeleteFilesStub: SinonStub;
-  let startTranscodeStub: SinonStub;
-  let askUserForDeleteStub: SinonStub;
-  let processStdoutStub: SinonStub;
-  let fileGetFilesByFileNameStub: SinonStub;
-  let fileGetFileNameStub: SinonStub;
-  let audioGetCodecStub: SinonStub;
-  let audioIsSameCodecStub: SinonStub;
-  let fsExistsSyncStub: SinonStub;
-  let countNumberOfLosslessFilesStub: SinonStub;
-  let inquirerPromptStub: SinonStub;
+  let sandbox: sinon.SinonSandbox;
+  let directoryIteratorStub: sinon.SinonStub;
+  let audioTranscodeStub: sinon.SinonStub;
+  let audioIsLosslessStub: sinon.SinonStub;
+  let pathJoinStub: sinon.SinonStub;
+  let fileGetRelativePathStub: sinon.SinonStub;
+  let fileCreateDirectoryStub: sinon.SinonStub;
+  let commandLineInputParserValidateStub: sinon.SinonStub;
+  let consoleInfoStub: sinon.SinonStub;
+  let getFilesToDeleteStub: sinon.SinonStub;
+  let fileDeleteFilesStub: sinon.SinonStub;
+  let startTranscodeStub: sinon.SinonStub;
+  let askUserForDeleteStub: sinon.SinonStub;
+  let processStdoutStub: sinon.SinonStub;
+  let fileGetFilesByFileNameStub: sinon.SinonStub;
+  let fileGetFileNameStub: sinon.SinonStub;
+  let audioGetCodecStub: sinon.SinonStub;
+  let audioIsSameCodecStub: sinon.SinonStub;
+  let fsExistsSyncStub: sinon.SinonStub;
+  let countNumberOfLosslessFilesStub: sinon.SinonStub;
+  let inquirerPromptStub: sinon.SinonStub;
 
   let testData: string[];
   let options: CommandLineOptions;
@@ -450,7 +448,7 @@ describe('app', () => {
 
     it('should ask the user for confirmation', async () => {
       // Arrange
-      const expectedQuestion: Question = {
+      const expectedQuestion: inquirer.Question = {
         type: 'confirm',
         name: 'confirmDelete',
         message: 'The files listed above will be deleted. Are you sure you want to continue?'
@@ -509,13 +507,13 @@ describe('app', () => {
   });
 });
 
-function createDirectoryIteratorStub(callbackParameters: string[], withArgs: string, sandbox: SinonSandbox): SinonStub {
+function createDirectoryIteratorStub(callbackParameters: string[], withArgs: string, sandbox: sinon.SinonSandbox): sinon.SinonStub {
   function stubFunction(input: string, callback: (filePath: string) => void): void {
     for (const callbackParameter of callbackParameters) {
       callback(callbackParameter);
     }
   }
-  const directoryIteratorStub: SinonStub = sandbox.stub(directoryIterator, 'run');
+  const directoryIteratorStub: sinon.SinonStub = sandbox.stub(directoryIterator, 'run');
   directoryIteratorStub.withArgs(withArgs, sinon.match.any).callsFake(stubFunction);
 
   return directoryIteratorStub;
