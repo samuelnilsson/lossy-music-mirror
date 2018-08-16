@@ -1,5 +1,6 @@
 language: node_js
 node_js:
+- '10'
 - '9'
 - '8'
 after_script:
@@ -15,8 +16,8 @@ deploy:
     branch: master
     tags: true
     repo: samuelnilsson/lossy-music-mirror
-    node: '9'
+    node: '10'
   on:
     branch: release/*
     repo: samuelnilsson/lossy-music-mirror
-    node: '9'
+    node: '10'
