@@ -39,6 +39,7 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
   const codec: LossyCodec = mapCodec(codecString);
 
   const deleteFiles: boolean = parsedArguments.deleteFiles;
+  const noAsk: boolean = parsedArguments.noAsk;
 
   let quality: number = parsedArguments.quality;
   if (quality == null) {
@@ -50,7 +51,8 @@ function parse(argParseOptions: ArgumentParserOptions = {}): CommandLineOptions 
     quality,
     input,
     codec,
-    deleteFiles
+    deleteFiles,
+    noAsk
   );
 }
 
@@ -95,6 +97,15 @@ function initializeOptions(parser: ArgumentParser): void {
     {
       help: 'Delete files in output that does not have a corresponding lossless file in input',
       dest: 'deleteFiles',
+      action: 'storeTrue',
+      defaultValue: false
+    }
+  );
+  parser.addArgument(
+    ['--no-ask'],
+    {
+      help: 'Do not ask any questions',
+      dest: 'noAsk',
       action: 'storeTrue',
       defaultValue: false
     }

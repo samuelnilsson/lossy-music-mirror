@@ -13,6 +13,7 @@ export class CommandLineOptions {
   public input: string;
   public codec: LossyCodec;
   public deleteFiles: boolean;
+  public noAsk: boolean;
 
   /**
    * Create CommandLineOptions.
@@ -21,12 +22,14 @@ export class CommandLineOptions {
    * @param input       - The input directory.
    * @param codec       - The output codec.
    * @param deleteFiles - True if files should be deleted.
+   * @param noAsk       - True if the program should not ask any questions.
    */
-  constructor(output: string, quality: number, input: string, codec: LossyCodec, deleteFiles: boolean) {
+  constructor(output: string, quality: number, input: string, codec: LossyCodec, deleteFiles: boolean, noAsk: boolean) {
     this.output = output;
     this.quality = quality;
     this.input = input;
     this.codec = codec;
     this.deleteFiles = deleteFiles;
+    this.noAsk = noAsk;
   }
 }

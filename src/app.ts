@@ -20,8 +20,15 @@ async function run(options: CommandLineOptions): Promise<void> {
   } else {
     if (options.deleteFiles) {
       const filesToDelete: string[] = self.getFilesToDelete(options.input, options.output, options.codec);
-      const answer: boolean = await self.askUserForDelete(filesToDelete);
-      if (answer) {
+      let shouldDelete: boolean = false;
+
+      if (options.noAsk) {
+        shouldDelete = true;
+      } else {
+        shouldDelete = await self.askUserForDelete(filesToDelete);
+      }
+
+      if (shouldDelete) {
         file.deleteFiles(filesToDelete, true);
       } else {
         console.info('Exiting.');
