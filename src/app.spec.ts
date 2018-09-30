@@ -71,7 +71,7 @@ describe('app', () => {
       getFilesToDeleteStub = sandbox.stub(app, 'getFilesToDelete');
       askUserForDeleteStub = sandbox.stub(app, 'askUserForDelete');
 
-      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false);
+      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false, false);
       commandLineInputParserValidateStub.withArgs(options).returns(true);
 
       filesToDeleteTestResponse = [
@@ -127,6 +127,20 @@ describe('app', () => {
       assert.isTrue(consoleInfoStub.withArgs('Exiting.').notCalled);
     });
 
+    it('should not ask the user before deleting files if the no-ask option is set to true', async () => {
+      // Arrange
+      options.noAsk = true;
+      options.deleteFiles = true;
+      commandLineInputParserValidateStub.withArgs(options).returns(true);
+
+      // Act
+      await app.run(options);
+
+      // Assert
+      assert.isTrue(askUserForDeleteStub.notCalled);
+      assert.isTrue(fileDeleteFilesStub.called);
+    });
+
     it('should print an exit message and exit if the user denies deleting files', async () => {
       // Arrange
       options.deleteFiles = true;
@@ -149,7 +163,7 @@ describe('app', () => {
 
       // Assert
       assert.isTrue(fileDeleteFilesStub.calledOnce);
-      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse, true));
+      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse, true, true));
     });
 
     it('should start the transcoding', async () => {
@@ -326,7 +340,7 @@ describe('app', () => {
       countNumberOfLosslessFilesStub = sandbox.stub(app, 'countNumberOfLosslessFiles');
       countNumberOfLosslessFilesStub.withArgs('inputDir').returns(2);
 
-      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false);
+      options = new CommandLineOptions('outputDir', 3, 'inputDir', new Vorbis(), false, false);
       testData = [
         '/any/musicFile.flac',
         '/any2/musicFile2.flac',

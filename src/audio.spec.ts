@@ -37,7 +37,7 @@ describe('audio', () => {
     pathJoinStub = sandbox.stub(path, 'join');
     spawnStub = sandbox.stub(spawn, 'sync');
     consoleInfoStub = sandbox.stub(console, 'info');
-    validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis(), false);
+    validOptions = new CommandLineOptions('any', 5, 'anyInput', new Vorbis(), false, false);
     fsExistsStub = sandbox.stub(fs, 'existsSync');
   });
 

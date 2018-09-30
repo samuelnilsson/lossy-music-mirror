@@ -221,6 +221,34 @@ describe('commandLineInputParser', () => {
         }
       ).calledOnce);
     });
+
+    it('should set the noAsk property on CommandLineOptions', () => {
+      // Act
+      validParseArgs.noAsk = true;
+      const trueResult: CommandLineOptions = commandLineInputParser.parse();
+      validParseArgs.noAsk = false;
+      const falseResult: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.isTrue(trueResult.noAsk);
+      assert.isFalse(falseResult.noAsk);
+    });
+
+    it('should initialize the noAsk argument', () => {
+      // Act
+      const result: CommandLineOptions = commandLineInputParser.parse();
+
+      // Assert
+      assert.isTrue(addArgumentStub.withArgs(
+        [ '--no-ask' ],
+        {
+          help: 'Disable questions',
+          dest: 'noAsk',
+          action: 'storeTrue',
+          defaultValue: false
+        }
+      ).calledOnce);
+    });
   });
 
   describe('validate', () => {
@@ -229,7 +257,7 @@ describe('commandLineInputParser', () => {
     let fileIsDirectoryStub: sinon.SinonStub;
 
     beforeEach(() => {
-      validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis(), false);
+      validOptions = new CommandLineOptions('output', 3, 'input', new Vorbis(), false, false);
       consoleInfoStub = sandbox.stub(console, 'info');
       fileIsDirectoryStub = sandbox.stub(file, 'isDirectory')
         .returns(true);
