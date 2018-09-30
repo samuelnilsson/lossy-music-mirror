@@ -29,7 +29,7 @@ async function run(options: CommandLineOptions): Promise<void> {
       }
 
       if (shouldDelete) {
-        file.deleteFiles(filesToDelete, true);
+        file.deleteFiles(filesToDelete, true, true);
       } else {
         console.info('Exiting.');
 

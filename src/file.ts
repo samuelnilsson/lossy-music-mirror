@@ -107,10 +107,13 @@ function getFilename(filePath: string): string {
  * @param deleteEmptyDirectories Remove the directory of the file or directory
  *                               if it becomes empty after deletion.
  */
-function deleteFiles(filePaths: string[], deleteEmptyDirectories: boolean = false): void {
+function deleteFiles(filePaths: string[], deleteEmptyDirectories: boolean = false, logToConsole: boolean = false): void {
   filePaths.forEach((f: string) => {
     if (fs.existsSync(f)) {
       fs.removeSync(f);
+      if (logToConsole) {
+        console.info(`Deleted ${f}`);
+      }
       if (deleteEmptyDirectories) {
         const directory: string = self.getDirectory(f);
         const directoryIsEmpty: boolean = fs.readdirSync(directory).length === 0;

@@ -20,6 +20,7 @@ describe('file', () => {
   let fileGetDirectoryStub: sinon.SinonStub;
   let fileGetFileNameStub: sinon.SinonStub;
   let fileGetFilesStub: sinon.SinonStub;
+  let consoleInfoStub: sinon.SinonStub;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
@@ -28,6 +29,7 @@ describe('file', () => {
     fsLstatStub = sandbox.stub(fs, 'lstatSync');
     fsReadDirStub = sandbox.stub(fs, 'readdirSync');
     fsRemoveSyncStub = sandbox.stub(fs, 'removeSync');
+    consoleInfoStub = sandbox.stub(console, 'info');
   });
 
   afterEach(() => {
@@ -337,6 +339,30 @@ describe('file', () => {
 
       // Assert
       assert.isFalse(fsRemoveSyncStub.withArgs(testDir).called);
+    });
+
+    it('should log the files getting deleted to the console if logToConsole is true', () => {
+      // Arrange
+      fsExistsStub.withArgs('/any/file').returns(true);
+      fsExistsStub.withArgs('/any/dir').returns(true);
+      const testFiles: string[] = [
+        '/any/file',
+        '/any/dir'
+      ];
+
+      // Act
+      file.deleteFiles(testFiles);
+
+      // Assert
+      assert.isFalse(consoleInfoStub.called);
+
+      // Act
+      file.deleteFiles(testFiles, undefined, true);
+
+      // Assert
+      assert.isTrue(consoleInfoStub.calledWith('Deleted /any/file'));
+      assert.isTrue(consoleInfoStub.calledWith('Deleted /any/dir'));
+      assert.isTrue(consoleInfoStub.calledTwice);
     });
   });
 

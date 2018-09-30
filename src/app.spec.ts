@@ -163,7 +163,7 @@ describe('app', () => {
 
       // Assert
       assert.isTrue(fileDeleteFilesStub.calledOnce);
-      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse, true));
+      assert.isTrue(fileDeleteFilesStub.calledWithExactly(filesToDeleteTestResponse, true, true));
     });
 
     it('should start the transcoding', async () => {
