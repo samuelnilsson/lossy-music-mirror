@@ -26,7 +26,7 @@ All the available options are:
 
 ```
 usage: lossy-music-mirror [-h] [-v] [-q QUALITY] [-i INPUT]
-                          [-c {vorbis,mp3,opus}] [--delete]
+                          [-c {vorbis,mp3,opus}] [--delete] [--no-ask]
                           output
 
 Positional arguments:
@@ -45,6 +45,7 @@ Optional arguments:
                         The output codec [default = vorbis]
   --delete              Delete files in output that does not have a 
                         corresponding lossless file in input
+  --no-ask              Disable questions
 ```
 
 ## Development

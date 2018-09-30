@@ -242,7 +242,7 @@ describe('commandLineInputParser', () => {
       assert.isTrue(addArgumentStub.withArgs(
         [ '--no-ask' ],
         {
-          help: 'Do not ask any questions',
+          help: 'Disable questions',
           dest: 'noAsk',
           action: 'storeTrue',
           defaultValue: false

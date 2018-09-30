@@ -104,7 +104,7 @@ function initializeOptions(parser: ArgumentParser): void {
   parser.addArgument(
     ['--no-ask'],
     {
-      help: 'Do not ask any questions',
+      help: 'Disable questions',
       dest: 'noAsk',
       action: 'storeTrue',
       defaultValue: false
